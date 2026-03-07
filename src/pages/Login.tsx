@@ -1,90 +1,128 @@
-import { useState } from "react"
-import { Eye, EyeOff, Lock, Phone } from "lucide-react"
+import { useEffect, useState } from "react"
+import { Lock } from "lucide-react"
 import { Navigate, useNavigate } from "react-router-dom"
-import { setAuth } from "../store/authSlice"
+import type { AxiosError } from "axios"
+import { setAuth, setToken } from "../store/authSlice"
 import { useAppDispatch, useAppSelector } from "../store"
 import client from "../api/client"
 import { Button, Checkbox, Input, message } from "antd"
+import type { CsrfResponse, LoginResponse } from "../types/auth"
+import { PASSWORD_RULE_TEXT, isStrongPassword } from "../utils/password"
+import { UserOutlined, EyeInvisibleOutlined, EyeOutlined } from "@ant-design/icons"
+let csrfInitPromise: Promise<CsrfResponse> | null = null
 
-const PASSWORD_PATTERN = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z\d])\S{8,16}$/
+const requestCsrfToken = async () => {
+  if (!csrfInitPromise) {
+    csrfInitPromise = client
+      .get<CsrfResponse>("/v1/auth/csrf/")
+      .then((res) => res.data)
+      .finally(() => {
+        csrfInitPromise = null
+      })
+  }
+  return csrfInitPromise
+}
 
 const Login = () => {
-  const [tab] = useState<"code" | "password">("password")
-  const [phone, setPhone] = useState("")
-  const [code, setCode] = useState("")
+  const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [remember, setRemember] = useState(true)
-  const [countdown, setCountdown] = useState(0)
+  const [csrfLoading, setCsrfLoading] = useState(false)
+  const [loginLoading, setLoginLoading] = useState(false)
   const token = useAppSelector((s) => s.auth.token)
+  const user = useAppSelector((s) => s.auth.user)
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
 
-  if (token) {
-    return <Navigate to="/" replace />
+  const getErrorMessage = (e: unknown) => {
+    const err = e as AxiosError<{ message?: string; error?: { message?: string; details?: { reason?: string } } }>
+    return err.response?.data?.error?.message || err.response?.data?.error?.details?.reason || err.response?.data?.message || "请求失败"
   }
 
-  const sendCode = async () => {
-    if (!phone || !/^1[3-9]\d{9}$/.test(phone)) {
-      message.warning("请先输入有效手机号")
-      return
+  useEffect(() => {
+    let active = true
+    const fetchCsrfToken = async () => {
+      if (token) return
+      setCsrfLoading(true)
+      try {
+        const data = await requestCsrfToken()
+        if (!active) return
+        if (!data.success || !data.data?.csrf_token) {
+          message.error(data.message || "初始化令牌失败")
+          return
+        }
+        dispatch(setToken(data.data.csrf_token))
+      } catch (e) {
+        if (!active) return
+        message.error(getErrorMessage(e) || "初始化令牌失败")
+      } finally {
+        if (active) {
+          setCsrfLoading(false)
+        }
+      }
     }
-    if (countdown > 0) return
-    try {
-      await client.post("/auth/sendCode", { phone })
-      message.success("验证码已发送")
-      setCountdown(60)
-      const timer = setInterval(() => {
-        setCountdown((s) => {
-          if (s <= 1) {
-            clearInterval(timer)
-            return 0
-          }
-          return s - 1
-        })
-      }, 1000)
-    } catch (e) {
-      const err = e as { response?: { data?: { message?: string } } }
-      message.error(err.response?.data?.message || "发送失败")
+    void fetchCsrfToken()
+    return () => {
+      active = false
     }
+  }, [dispatch, token])
+
+  if (token && user) {
+    return <Navigate to="/" replace />
   }
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    const phoneValue = phone.trim()
-    const codeValue = code.trim()
+    const usernameValue = username.trim()
     const passwordValue = password.trim()
-    if (!phoneValue) {
-      message.warning("请输入手机号")
+    if (!usernameValue) {
+      message.warning("请输入用户名")
       return
     }
-    if (!/^1[3-9]\d{9}$/.test(phoneValue)) {
-      message.warning("请输入有效手机号")
-      return
-    }
-    if (tab === "code" && !codeValue) {
-      message.warning("请输入验证码")
-      return
-    }
-    if (tab === "password" && !passwordValue) {
+    if (!passwordValue) {
       message.warning("请输入密码")
       return
     }
-    if (tab === "password" && !PASSWORD_PATTERN.test(passwordValue)) {
-      message.warning("密码需为8-16位，并包含数字、字母和特殊符号")
+    if (!isStrongPassword(passwordValue)) {
+      message.warning(PASSWORD_RULE_TEXT)
       return
     }
-    const mockLoginData = {
-      token: "mock-token",
-      user: { name: "李杰", phone: phoneValue },
+    if (!token) {
+      message.warning("令牌初始化中，请稍后重试")
+      return
     }
-    dispatch(
-      setAuth({
-        token: mockLoginData.token,
-        user: mockLoginData.user,
-        remember,
-      })
-    )
-    navigate("/")
+    try {
+      setLoginLoading(true)
+      const { data } = await client.post<LoginResponse>(
+        "/v1/auth/login/",
+        { username: usernameValue, password: passwordValue },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      )
+      if (!data.success) {
+        message.error(data.message || "登录失败")
+        return
+      }
+      dispatch(
+        setAuth({
+          token: data.data.csrf_token,
+          user: {
+            ...data.data.user,
+            name: data.data.user.display_name || data.data.user.username,
+          },
+          remember,
+        })
+      )
+      message.success(data.message || "登录成功")
+      navigate("/")
+    } catch (e) {
+      message.error(getErrorMessage(e) || "登录失败")
+    } finally {
+      setLoginLoading(false)
+    }
   }
 
   return (
@@ -131,86 +169,56 @@ const Login = () => {
           <form className="space-y-4" onSubmit={onSubmit}>
             <div>
               <label className="block text-sm font-medium text-slate-600 mb-1">
-                手机号
+                用户名
               </label>
               <Input autoComplete="on"
                 size="large"
-                prefix={<Phone className="w-5 h-5 text-slate-400" />}
+                prefix={<UserOutlined className="w-6 h-6 text-slate-600" />}
                 className="input-glass w-full rounded-lg"
-                placeholder="请输入手机号"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                placeholder="请输入用户名"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 style={{ height: 48 }}
               />
             </div>
-            {tab === "code" ? (
-              <div>
-                <label className="block text-sm font-medium text-slate-600 mb-1">
-                  验证码
-                </label>
-                <div className="flex space-x-3">
-                  <Input
-                    size="large"
-                    className="input-glass flex-1 rounded-lg"
-                    placeholder="6位验证码"
-                    value={code}
-                    onChange={(e) => setCode(e.target.value)}
-                    style={{ height: 48 }}
-                    autoComplete="on"
-                  />
-                  <Button
-                    size="large"
-                    onClick={sendCode}
-                    disabled={countdown > 0}
-                    style={{ height: 48, minWidth: 140 }}
-                  >
-                    {countdown > 0 ? `${countdown}s 后重试` : "获取验证码"}
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <div>
-                <label className="block text-sm font-medium text-slate-600 mb-1">
-                  密码
-                </label>
-                <Input.Password
-                  size="large"
-                  prefix={<Lock className="w-5 h-5 text-slate-400" />}
-                  className="input-glass w-full rounded-lg"
-                  placeholder="请输入密码"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  iconRender={(visible) =>
-                    visible ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />
-                  }
-                  style={{ height: 48 }} 
-                  autoComplete="on"
-                />
-                <p className="text-xs text-slate-500 mt-1">
-                  8-16位，含数字+字母+特殊符号
-                </p>
-              </div>
-            )}
-            {tab === "password" ? (
-              <div className="flex items-center justify-between text-sm">
-                <Checkbox
-                  checked={remember}
-                  onChange={(e) => setRemember(e.target.checked)}
-                  className="text-slate-600"
-                >
-                  记住密码
-                </Checkbox>
-                <Button type="link" className="p-0" htmlType="button" onClick={() => navigate("/change-password")}>
-                  忘记密码？
-                </Button>
-              </div>
-            ) : null}
+            <div>
+              <label className="block text-sm font-medium text-slate-600 mb-1">
+                密码
+              </label>
+              <Input.Password
+                size="large"
+                prefix={<Lock className="w-5 h-5 text-slate-600" />}
+                className="input-glass w-full rounded-lg"
+                placeholder="请输入密码"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                iconRender={(visible) =>
+                  visible ? <EyeInvisibleOutlined className="w-6 h-6 text-slate-600" /> : <EyeOutlined className="w-6 h-6 text-slate-600" />
+                }
+                style={{ height: 48 }}
+                autoComplete="on"
+              />
+              <p className="mt-1 text-xs text-slate-500">{PASSWORD_RULE_TEXT}</p>
+            </div>
+            <div className="flex items-center justify-between text-sm">
+              <Checkbox
+                checked={remember}
+                onChange={(e) => setRemember(e.target.checked)}
+                className="text-slate-600"
+              >
+                记住密码
+              </Checkbox>
+              {/* <Button type="link" className="p-0" htmlType="button" onClick={() => navigate("/change-password")}>
+                忘记密码？
+              </Button> */}
+            </div>
             <Button
               type="primary"
               size="large"
               htmlType="submit"
               className="w-full rounded-lg"
               style={{ height: 52 }}
+              loading={csrfLoading || loginLoading}
             >
               立即登录
             </Button>

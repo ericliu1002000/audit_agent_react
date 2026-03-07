@@ -1,19 +1,15 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit"
-
-type User = {
-  name: string
-  phone: string
-}
+import type { AuthUser } from "../types/auth"
 
 type AuthState = {
   token: string | null
-  user: User | null
+  user: AuthUser | null
   remember: boolean
 }
 
 const getStoredToken = () => {
   try {
-    return localStorage.getItem("auth_token")
+    return localStorage.getItem("auth_token") || sessionStorage.getItem("auth_token")
   } catch {
     return null
   }
@@ -22,7 +18,7 @@ const getStoredToken = () => {
 const getStoredUser = () => {
   try {
     const raw = localStorage.getItem("auth_user")
-    return raw ? (JSON.parse(raw) as User) : null
+    return raw ? (JSON.parse(raw) as AuthUser) : null
   } catch {
     return null
   }
@@ -38,16 +34,26 @@ const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
+    setToken: (state, action: PayloadAction<string>) => {
+      state.token = action.payload
+      localStorage.setItem("auth_token", action.payload)
+      sessionStorage.removeItem("auth_token")
+    },
     setAuth: (
       state,
-      action: PayloadAction<{ token: string; user: User; remember: boolean }>
+      action: PayloadAction<{ token: string; user: AuthUser; remember: boolean }>
     ) => {
       state.token = action.payload.token
       state.user = action.payload.user
       state.remember = action.payload.remember
       if (action.payload.remember) {
         localStorage.setItem("auth_token", action.payload.token)
+        sessionStorage.removeItem("auth_token")
         localStorage.setItem("auth_user", JSON.stringify(action.payload.user))
+      } else {
+        localStorage.removeItem("auth_token")
+        sessionStorage.setItem("auth_token", action.payload.token)
+        localStorage.removeItem("auth_user")
       }
     },
     clearAuth: (state) => {
@@ -55,6 +61,7 @@ const authSlice = createSlice({
       state.user = null
       try {
         localStorage.removeItem("auth_token")
+        sessionStorage.removeItem("auth_token")
         localStorage.removeItem("auth_user")
       } catch {
         return
@@ -63,5 +70,5 @@ const authSlice = createSlice({
   },
 })
 
-export const { setAuth, clearAuth } = authSlice.actions
+export const { setToken, setAuth, clearAuth } = authSlice.actions
 export default authSlice.reducer

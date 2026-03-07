@@ -128,7 +128,7 @@ const DashboardLayout = ({ children }: PropsWithChildren) => {
         onOk={() => profileForm.submit()}
         okText="保存"
         cancelText="取消"
-        destroyOnClose
+        destroyOnHidden
       >
         <div className="mb-4 space-y-1">
           <Typography.Text type="secondary">
@@ -178,7 +178,7 @@ const DashboardLayout = ({ children }: PropsWithChildren) => {
         onOk={() => feedbackForm.submit()}
         okText="提交"
         cancelText="取消"
-        destroyOnClose
+        destroyOnHidden
       >
         <Form
           form={feedbackForm}
@@ -215,7 +215,7 @@ const DashboardLayout = ({ children }: PropsWithChildren) => {
           form.resetFields()
         }}
         footer={null}
-        destroyOnClose
+        destroyOnHidden
       >
         {changeSuccess ? (
           <Result

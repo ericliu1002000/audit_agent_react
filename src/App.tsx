@@ -4,9 +4,10 @@ import { useAppSelector } from "./store"
 
 const App = () => {
   const token = useAppSelector((state) => state.auth.token)
+  const user = useAppSelector((state) => state.auth.user)
   const location = useLocation()
 
-  if (!token) {
+  if (!token || !user) {
     return <Navigate to="/login" replace state={{ from: location }} />
   }
 

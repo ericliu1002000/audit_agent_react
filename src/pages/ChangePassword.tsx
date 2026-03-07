@@ -1,7 +1,12 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { ArrowLeft, Lock } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { Button, Form, Input, message } from "antd"
+import { useAppDispatch } from "../store"
+import { clearAuth } from "../store/authSlice"
+import client from "../api/client"
+import type { ChangePasswordResponse } from "../types/auth"
+import { PASSWORD_RULE_TEXT, isStrongPassword } from "../utils/password"
 
 type ChangePasswordFormValues = {
   oldPass: string
@@ -12,39 +17,47 @@ type ChangePasswordFormValues = {
 const ChangePassword = () => {
   const [form] = Form.useForm()
   const [loading, setLoading] = useState(false)
-  const [countdown, setCountdown] = useState(3)
-  const [success, setSuccess] = useState(false)
+  const dispatch = useAppDispatch()
   const navigate = useNavigate()
 
-  useEffect(() => {
-    let t: number | undefined
-    if (success) {
-      t = window.setInterval(() => {
-        setCountdown((s) => {
-          if (s <= 1) {
-            window.clearInterval(t)
-            navigate("/login", { replace: true })
-            return 0
-          }
-          return s - 1
-        })
-      }, 1000)
-    }
-    return () => {
-      if (t) window.clearInterval(t)
-    }
-  }, [success, navigate])
-
   const onFinish = async (values: ChangePasswordFormValues) => {
+    const oldPassword = values.oldPass.trim()
+    const newPassword = values.newPass.trim()
+    const confirmPassword = values.confirmPass.trim()
+    if (!oldPassword || !newPassword || !confirmPassword) return
+    if (oldPassword === newPassword) {
+      message.warning("新密码不能与原密码一致")
+      return
+    }
+    if (!isStrongPassword(newPassword)) {
+      message.warning(PASSWORD_RULE_TEXT)
+      return
+    }
+    if (!isStrongPassword(confirmPassword)) {
+      message.warning(PASSWORD_RULE_TEXT)
+      return
+    }
+    if (newPassword !== confirmPassword) {
+      message.warning("两次输入的密码不一致")
+      return
+    }
     try {
       setLoading(true)
-      const { oldPass, newPass } = values
-      if (!oldPass || !newPass) return
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-      message.success("修改成功")
-      setSuccess(true)
-    } catch {
-      message.error("修改失败")
+      const { data } = await client.post<ChangePasswordResponse>("/v1/auth/change-password/", {
+        old_password: oldPassword,
+        new_password1: newPassword,
+        new_password2: confirmPassword,
+      })
+      if (!data.success) {
+        message.error(data.message || "修改失败")
+        return
+      }
+      dispatch(clearAuth())
+      message.success(data.message || "修改成功，请重新登录")
+      navigate("/login", { replace: true })
+    } catch (e) {
+      const err = e as { response?: { data?: { message?: string; error?: { message?: string } } } }
+      message.error(err.response?.data?.error?.message || err.response?.data?.message || "修改失败")
     } finally {
       setLoading(false)
     }
@@ -53,19 +66,21 @@ const ChangePassword = () => {
   return (
     <div className="h-screen w-screen flex flex-col items-center justify-center text-slate-800 relative overflow-hidden">
       <div className="aurora-bg" />
-      <Button
-        type="link"
-        htmlType="button"
-        className="absolute top-8 left-8 z-10 flex items-center gap-1 p-0 text-slate-700"
-        onClick={() => navigate(-1)}
-      >
-        <ArrowLeft className="w-4 h-4" />
-        返回
-      </Button>
 
       <div className="w-full max-w-md glass-panel-light rounded-2xl p-8 shadow-2xl border-t border-white/50 relative z-10">
         <div className="liquid-glass" />
-        <h2 className="text-2xl font-semibold mb-6 text-center text-slate-800">修改密码</h2>
+        <div className="relative mb-6 flex items-center justify-center">
+          <Button
+            type="link"
+            htmlType="button"
+            className="absolute left-0 flex items-center gap-1 p-0 text-slate-700"
+            onClick={() => navigate(-1)}
+          >
+            <ArrowLeft className="w-4 h-4" />
+            去登录
+          </Button>
+          <h2 className="text-2xl font-semibold text-center text-slate-800">修改密码</h2>
+        </div>
         <Form
           form={form}
           layout="vertical"
@@ -89,13 +104,24 @@ const ChangePassword = () => {
           <Form.Item
             name="newPass"
             label={<span className="text-slate-600 font-medium">新密码</span>}
+            dependencies={["oldPass"]}
+            extra={<span className="text-xs text-slate-500">{PASSWORD_RULE_TEXT}</span>}
             rules={[
               { required: true, message: "请输入新密码" },
-              { min: 8, max: 16, message: "8-16位字符" },
-              {
-                pattern: /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{8,16}$/,
-                message: "需包含数字、字母及特殊符号",
-              },
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  if (!value) {
+                    return Promise.resolve()
+                  }
+                  if (value === getFieldValue("oldPass")) {
+                    return Promise.reject(new Error("新密码不能与原密码一致"))
+                  }
+                  if (!value || isStrongPassword(value)) {
+                    return Promise.resolve()
+                  }
+                  return Promise.reject(new Error(PASSWORD_RULE_TEXT))
+                },
+              }),
             ]}
           >
             <Input.Password
@@ -109,14 +135,21 @@ const ChangePassword = () => {
             name="confirmPass"
             label={<span className="text-slate-600 font-medium">确认新密码</span>}
             dependencies={["newPass"]}
+            extra={<span className="text-xs text-slate-500">{PASSWORD_RULE_TEXT}</span>}
             rules={[
               { required: true, message: "请再次输入新密码" },
               ({ getFieldValue }) => ({
                 validator(_, value) {
-                  if (!value || getFieldValue("newPass") === value) {
+                  if (!value) {
                     return Promise.resolve()
                   }
-                  return Promise.reject(new Error("两次输入的密码不一致"))
+                  if (!isStrongPassword(value)) {
+                    return Promise.reject(new Error(PASSWORD_RULE_TEXT))
+                  }
+                  if (getFieldValue("newPass") !== value) {
+                    return Promise.reject(new Error("两次输入的密码不一致"))
+                  }
+                  return Promise.resolve()
                 },
               }),
             ]}
@@ -141,19 +174,6 @@ const ChangePassword = () => {
           </Form.Item>
         </Form>
       </div>
-
-      {success && (
-        <div className="absolute inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="glass-panel-light p-8 rounded-2xl shadow-2xl text-center max-w-sm mx-4 bg-white/90 border border-white/60">
-            <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
-              <span className="text-green-600 font-bold text-xl">✓</span>
-            </div>
-            <h3 className="text-lg font-medium text-slate-800 mb-2">密码修改成功</h3>
-            <p className="text-sm text-slate-500 mb-2">请使用新密码重新登录</p>
-            <p className="text-xs text-slate-400">正在跳转至登录页 ({countdown}s)...</p>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

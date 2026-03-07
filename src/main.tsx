@@ -10,7 +10,7 @@ import ChangePassword from "./pages/ChangePassword"
 import { store } from "./store"
 import DashboardHome from "./pages/DashboardHome"
 import FinancialReportPage from "./pages/FinancialReportPage"
-import AuditPage from "./pages/AuditPage"
+import AuditAnalysisPage from "./pages/AuditAnalysisPage"
 import TaxPage from "./pages/TaxPage"
 const router = createBrowserRouter([
   {
@@ -18,6 +18,7 @@ const router = createBrowserRouter([
     element: <App />,
     children: [
       { index: true, element: <DashboardHome /> },
+      { path: "audit-analysis", element: <AuditAnalysisPage /> },
       { path: "report", element: <FinancialReportPage /> },
       { path: "tax", element: <TaxPage /> },
     ],
