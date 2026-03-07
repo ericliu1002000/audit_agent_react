@@ -4,10 +4,12 @@ import { Navigate, useNavigate } from "react-router-dom"
 import { setAuth } from "../store/authSlice"
 import { useAppDispatch, useAppSelector } from "../store"
 import client from "../api/client"
-import { Button, Checkbox, Input, Segmented, message } from "antd"
+import { Button, Checkbox, Input, message } from "antd"
+
+const PASSWORD_PATTERN = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z\d])\S{8,16}$/
 
 const Login = () => {
-  const [tab, setTab] = useState<"code" | "password">("password")
+  const [tab] = useState<"code" | "password">("password")
   const [phone, setPhone] = useState("")
   const [code, setCode] = useState("")
   const [password, setPassword] = useState("")
@@ -65,6 +67,10 @@ const Login = () => {
     }
     if (tab === "password" && !passwordValue) {
       message.warning("请输入密码")
+      return
+    }
+    if (tab === "password" && !PASSWORD_PATTERN.test(passwordValue)) {
+      message.warning("密码需为8-16位，并包含数字、字母和特殊符号")
       return
     }
     const mockLoginData = {
@@ -150,6 +156,7 @@ const Login = () => {
                     value={code}
                     onChange={(e) => setCode(e.target.value)}
                     style={{ height: 48 }}
+                    autoComplete="on"
                   />
                   <Button
                     size="large"
@@ -176,7 +183,8 @@ const Login = () => {
                   iconRender={(visible) =>
                     visible ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />
                   }
-                  style={{ height: 48 }}
+                  style={{ height: 48 }} 
+                  autoComplete="on"
                 />
                 <p className="text-xs text-slate-500 mt-1">
                   8-16位，含数字+字母+特殊符号

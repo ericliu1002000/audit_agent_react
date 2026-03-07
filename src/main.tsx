@@ -12,7 +12,6 @@ import DashboardHome from "./pages/DashboardHome"
 import FinancialReportPage from "./pages/FinancialReportPage"
 import AuditPage from "./pages/AuditPage"
 import TaxPage from "./pages/TaxPage"
-
 const router = createBrowserRouter([
   {
     path: "/",
@@ -20,7 +19,6 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <DashboardHome /> },
       { path: "report", element: <FinancialReportPage /> },
-      { path: "audit", element: <AuditPage /> },
       { path: "tax", element: <TaxPage /> },
     ],
   },
