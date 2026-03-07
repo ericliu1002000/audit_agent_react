@@ -31,6 +31,7 @@ import { clearAuth } from "../store/authSlice"
 import client from "../api/client"
 import type { ChangePasswordResponse, LogoutResponse } from "../types/auth"
 import { PASSWORD_RULE_TEXT, isStrongPassword } from "../utils/password"
+import { getWebSocketClient } from "../utils/websocket"
 import "./DashboardHome.audit.css"
 
 const venueOptionsByCity: Record<string, string[]> = {
@@ -39,6 +40,7 @@ const venueOptionsByCity: Record<string, string[]> = {
 
 const DashboardHome = () => {
   const user = useAppSelector((s) => s.auth.user)
+  const token = useAppSelector((s) => s.auth.token)
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
   const [projectForm] = Form.useForm()
@@ -70,6 +72,12 @@ const DashboardHome = () => {
       window.clearTimeout(timer)
     }
   }, [projectForm])
+
+  useEffect(() => {
+    if (!token) return
+    // const wsClient = getWebSocketClient()
+    // wsClient.connect()
+  }, [token])
 
   const currentVenueOptions = venueOptionsByCity[selectedCity || "天津"] || []
 
