@@ -16,7 +16,6 @@ import {
   Modal,
   Radio,
   Result,
-  Select,
   Tag,
   Typography,
   Upload,
@@ -31,12 +30,12 @@ import { clearAuth } from "../store/authSlice"
 import client from "../api/client"
 import type { ChangePasswordResponse, LogoutResponse } from "../types/auth"
 import { PASSWORD_RULE_TEXT, isStrongPassword } from "../utils/password"
-import { getWebSocketClient } from "../utils/websocket"
 import "./DashboardHome.audit.css"
 
 const venueOptionsByCity: Record<string, string[]> = {
-  天津: ["天津梅江会展中心", "国家会展中心(天津)", "其他"],
+  天津: ["天津梅江会展中心", "国家会展中心(天津)"],
 }
+const FIXED_CITY = "天津"
 
 const DashboardHome = () => {
   const user = useAppSelector((s) => s.auth.user)
@@ -47,7 +46,6 @@ const DashboardHome = () => {
   const [changeForm] = Form.useForm()
   const [profileForm] = Form.useForm()
   const [feedbackForm] = Form.useForm()
-  const selectedCity = Form.useWatch("city", projectForm)
   const [uploadedFile, setUploadedFile] = useState<{ name: string; size: string } | null>(null)
   const [showProfile, setShowProfile] = useState(false)
   const [showFeedback, setShowFeedback] = useState(false)
@@ -61,7 +59,7 @@ const DashboardHome = () => {
 
   useEffect(() => {
     projectForm.setFieldsValue({
-      city: "天津",
+      city: FIXED_CITY,
       projectType: "临时展会",
       venue: "天津梅江会展中心",
     })
@@ -79,7 +77,7 @@ const DashboardHome = () => {
     // wsClient.connect()
   }, [token])
 
-  const currentVenueOptions = venueOptionsByCity[selectedCity || "天津"] || []
+  const currentVenueOptions = venueOptionsByCity[FIXED_CITY] || []
 
   const dropdownItems: MenuProps["items"] = [
     {
@@ -189,23 +187,15 @@ const DashboardHome = () => {
           </div>
           <Form form={projectForm} layout="vertical" className="audit-config-form">
             <Form.Item label="城市" name="city">
-              <Select
-                size="large"
-                options={[{ label: "天津", value: "天津" }]}
-                onChange={(city) => {
-                  const venues = venueOptionsByCity[city] || []
-                  projectForm.setFieldValue("venue", venues[0])
-                }}
-              />
+              <Radio.Group className="audit-venue-group">
+                <Radio value={FIXED_CITY}>天津</Radio>
+              </Radio.Group>
             </Form.Item>
             <Form.Item label="项目性质" name="projectType">
-              <Select
-                size="large"
-                options={[
-                  { label: "临时展会", value: "临时展会" },
-                  { label: "常设陈列", value: "常设陈列" },
-                ]}
-              />
+              <Radio.Group className="audit-venue-group">
+                <Radio value="临时展会">临时展会</Radio>
+                <Radio value="常设陈列">常设陈列</Radio>
+              </Radio.Group>
             </Form.Item>
             <Form.Item label="目标场馆" name="venue">
               <Radio.Group className="audit-venue-group">

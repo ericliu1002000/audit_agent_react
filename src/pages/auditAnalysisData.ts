@@ -35,6 +35,21 @@ export const auditRows: AuditRow[] = [
   { key: 13, index: 13, item: "清洁卫生服务", declared: 22000, ai: 18000, status: "warning" },
   { key: 14, index: 14, item: "开幕式花篮", declared: 15000, ai: 5000, status: "danger" },
   { key: 15, index: 15, item: "办公设备租赁", declared: 12000, ai: 11000, status: "normal" },
+  { key: 16, index: 15, item: "办公设备租赁2", declared: 12000, ai: 11000, status: "normal" },
+  { key: 17, index: 16, item: "办公设备租赁3", declared: 12000, ai: 11000, status: "normal" },
+  { key: 18, index: 17, item: "办公设备租赁4", declared: 12000, ai: 11000, status: "normal" },
+  { key: 19, index: 18, item: "办公设备租赁5", declared: 12000, ai: 11000, status: "normal" },
+  { key: 20, index: 19, item: "办公设备租赁6", declared: 12000, ai: 11000, status: "normal" },
+  { key: 21, index: 20, item: "办公设备租赁7", declared: 12000, ai: 11000, status: "normal" },
+  { key: 22, index: 21, item: "办公设备租赁8", declared: 12000, ai: 11000, status: "normal" },
+  { key: 23, index: 22, item: "办公设备租赁9", declared: 12000, ai: 11000, status: "normal" },
+  { key: 24, index: 23, item: "办公设备租赁10", declared: 12000, ai: 11000, status: "normal" },
+  { key: 25, index: 24, item: "办公设备租赁11", declared: 12000, ai: 11000, status: "normal" },
+  { key: 26, index: 25, item: "办公设备租赁12", declared: 12000, ai: 11000, status: "normal" },
+  { key: 27, index: 26, item: "办公设备租赁13", declared: 12000, ai: 11000, status: "normal" },
+  { key: 28, index: 27, item: "办公设备租赁14", declared: 12000, ai: 11000, status: "normal" },
+  { key: 29, index: 28, item: "办公设备租赁15", declared: 12000, ai: 11000, status: "normal" },
+  { key: 30, index: 29, item: "办公设备租赁16", declared: 12000, ai: 11000, status: "normal" },
 ]
 
 export const auditIssues: AuditIssue[] = [

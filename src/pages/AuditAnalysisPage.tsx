@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react"
-import { AlertTriangle, BrainCircuit, CircleGauge, Download, TrendingDown, TriangleAlert } from "lucide-react"
+import { AlertTriangle, BrainCircuit, CircleGauge, Download, TrendingDown, TriangleAlert,ArrowLeft } from "lucide-react"
 import { Button, Card, List, Progress, Statistic, Steps, Table, Tag, Typography } from "antd"
 import type { ColumnsType } from "antd/es/table"
 import { useNavigate } from "react-router-dom"
@@ -14,9 +14,12 @@ const AuditAnalysisPage = () => {
   const [viewState, setViewState] = useState<ViewState>("processing")
   const [progress, setProgress] = useState(0)
   const [activeStep, setActiveStep] = useState(0)
+  const [tableScrollY, setTableScrollY] = useState(480)
   const progressTimer = useRef<number | null>(null)
   const stepTimer = useRef<number | null>(null)
   const finishTimer = useRef<number | null>(null)
+  const resultStateRef = useRef<HTMLDivElement | null>(null)
+  const resultTopRef = useRef<HTMLDivElement | null>(null)
 
   const totals = useMemo(() => {
     const declared = auditRows.reduce((sum, row) => sum + row.declared, 0)
@@ -67,6 +70,34 @@ const AuditAnalysisPage = () => {
       clearTimers()
     }
   }, [])
+
+  useEffect(() => {
+    if (viewState !== "result") return
+    const updateTableScrollY = () => {
+      const resultStateEl = resultStateRef.current
+      const resultTopEl = resultTopRef.current
+      if (!resultStateEl || !resultTopEl) return
+      const resultStateHeight = resultStateEl.getBoundingClientRect().height
+      const resultTopHeight = resultTopEl.getBoundingClientRect().height
+      const nextScrollY = Math.max(240, Math.floor(resultStateHeight - resultTopHeight - 20 - 152))
+      setTableScrollY((prev) => (prev === nextScrollY ? prev : nextScrollY))
+    }
+    updateTableScrollY()
+    const resizeObserver = new ResizeObserver(updateTableScrollY)
+    const resultStateEl = resultStateRef.current
+    const resultTopEl = resultTopRef.current
+    if (resultStateEl) {
+      resizeObserver.observe(resultStateEl)
+    }
+    if (resultTopEl) {
+      resizeObserver.observe(resultTopEl)
+    }
+    window.addEventListener("resize", updateTableScrollY)
+    return () => {
+      window.removeEventListener("resize", updateTableScrollY)
+      resizeObserver.disconnect()
+    }
+  }, [viewState])
 
   const statusTag = (status: AmountStatus) => {
     if (status === "danger") {
@@ -152,44 +183,46 @@ const AuditAnalysisPage = () => {
         )}
 
         {viewState === "result" && (
-          <div className="audit-result-state">
-            <div className="flex justify-between items-center mb-4">
-              <Typography.Title level={4} className="!mb-0">
-                智能分析结果
-              </Typography.Title>
-              <div className="flex gap-2">
-                <Button type="primary" className="audit-export-btn" icon={<Download className="w-4 h-4" />}>
-                  导出评审报告
-                </Button>
-                <Button onClick={() => navigate("/")}>重新分析</Button>
+          <div className="audit-result-state" ref={resultStateRef}>
+            <div ref={resultTopRef}>
+              <div className="flex justify-between items-center mb-4">
+                <Typography.Title level={4} className="!mb-0">
+                  智能分析结果
+                </Typography.Title>
+                <div className="flex gap-2">
+                  <Button type="primary"  icon={<Download className="w-4 h-4" />}>
+                    导出评审报告
+                  </Button>
+                  <Button className="audit-export-btn" icon={<ArrowLeft className="w-4 h-4" />} onClick={() => navigate("/")}>返回首页</Button>
+                </div>
               </div>
-            </div>
-            <div className="audit-metric-grid">
-              <Card variant="borderless" className="audit-metric-card audit-metric-card-declared">
-                <Statistic
-                  title="申报总额"
-                  value={totals.declared}
-                  formatter={(value) => formatCurrency(Number(value))}
-                  prefix={<CircleGauge className="w-4 h-4 text-blue-500" />}
-                />
-              </Card>
-              <Card variant="borderless" className="audit-metric-card audit-metric-card-ai">
-                <Statistic
-                  title="AI审核金额"
-                  value={totals.ai}
-                  formatter={(value) => formatCurrency(Number(value))}
-                  prefix={<BrainCircuit className="w-4 h-4 text-violet-500" />}
-                />
-              </Card>
-              <Card variant="borderless" className="audit-metric-card audit-metric-card-reduction">
-                <Statistic
-                  title="建议核减"
-                  value={totals.reduction}
-                  formatter={(value) => formatCurrency(Number(value))}
-                  prefix={<TrendingDown className="w-4 h-4 text-red-500" />}
-                  suffix={`(${totals.ratio}%)`}
-                />
-              </Card>
+              <div className="audit-metric-grid">
+                <Card variant="borderless" className="audit-metric-card audit-metric-card-declared">
+                  <Statistic
+                    title="申报总额"
+                    value={totals.declared}
+                    formatter={(value) => formatCurrency(Number(value))}
+                    prefix={<CircleGauge className="w-4 h-4 text-blue-500" />}
+                  />
+                </Card>
+                <Card variant="borderless" className="audit-metric-card audit-metric-card-ai">
+                  <Statistic
+                    title="AI审核金额"
+                    value={totals.ai}
+                    formatter={(value) => formatCurrency(Number(value))}
+                    prefix={<BrainCircuit className="w-4 h-4 text-violet-500" />}
+                  />
+                </Card>
+                <Card variant="borderless" className="audit-metric-card audit-metric-card-reduction">
+                  <Statistic
+                    title="建议核减"
+                    value={totals.reduction}
+                    formatter={(value) => formatCurrency(Number(value))}
+                    prefix={<TrendingDown className="w-4 h-4 text-red-500" />}
+                    suffix={`(${totals.ratio}%)`}
+                  />
+                </Card>
+              </div>
             </div>
 
             <div className="audit-result-main">
@@ -200,6 +233,7 @@ const AuditAnalysisPage = () => {
                   dataSource={auditRows}
                   pagination={false}
                   size="small"
+                  scroll={{ y: tableScrollY }}
                   rowClassName={(record) =>
                     record.status === "danger" ? "audit-row-danger" : record.status === "warning" ? "audit-row-warning" : ""
                   }
