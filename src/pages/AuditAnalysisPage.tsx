@@ -1,10 +1,20 @@
 import { useEffect, useMemo, useRef, useState } from "react"
-import { AlertTriangle, BrainCircuit, CircleGauge, Download, TrendingDown, TriangleAlert,ArrowLeft } from "lucide-react"
+import {
+  AlertTriangle,
+  ArrowLeft,
+  BrainCircuit,
+  ChevronDown,
+  ChevronUp,
+  CircleGauge,
+  Download,
+  TrendingDown,
+  TriangleAlert,
+} from "lucide-react"
 import { Button, Card, List, Progress, Statistic, Steps, Table, Tag, Typography } from "antd"
 import type { ColumnsType } from "antd/es/table"
 import { useNavigate } from "react-router-dom"
 import { auditIssues, auditRows, formatCurrency } from "./auditAnalysisData"
-import type { AmountStatus, AuditRow } from "./auditAnalysisData"
+import type { AmountStatus, AuditDetailRow, AuditRow } from "./auditAnalysisData"
 import "./AuditAnalysisPage.css"
 
 type ViewState = "processing" | "result"
@@ -15,6 +25,7 @@ const AuditAnalysisPage = () => {
   const [progress, setProgress] = useState(0)
   const [activeStep, setActiveStep] = useState(0)
   const [tableScrollY, setTableScrollY] = useState(480)
+  const [expandedRowKey, setExpandedRowKey] = useState<number | null>(null)
   const progressTimer = useRef<number | null>(null)
   const stepTimer = useRef<number | null>(null)
   const finishTimer = useRef<number | null>(null)
@@ -130,6 +141,105 @@ const AuditAnalysisPage = () => {
     )
   }
 
+  const detailColumns: ColumnsType<AuditDetailRow> = [
+    {
+      title: "送审",
+      align: "center",
+      onHeaderCell: () => ({ className: "audit-detail-head-submitted" }),
+      children: [
+        {
+          title: "计量单位",
+          dataIndex: "submittedUnit",
+          width: 96,
+          align: "center",
+          onHeaderCell: () => ({ className: "audit-detail-head-submitted" }),
+        },
+        {
+          title: "单价（元）",
+          dataIndex: "submittedUnitPrice",
+          width: 116,
+          align: "center",
+          onHeaderCell: () => ({ className: "audit-detail-head-submitted" }),
+          render: (value: number) => <span className="font-mono">{formatCurrency(value)}</span>,
+        },
+        {
+          title: "数量",
+          dataIndex: "submittedQuantity",
+          width: 86,
+          align: "center",
+          onHeaderCell: () => ({ className: "audit-detail-head-submitted" }),
+        },
+        {
+          title: "天数",
+          dataIndex: "submittedDays",
+          width: 86,
+          align: "center",
+          onHeaderCell: () => ({ className: "audit-detail-head-submitted" }),
+        },
+        {
+          title: "预算金额（元）",
+          dataIndex: "submittedAmount",
+          width: 136,
+          align: "center",
+          onHeaderCell: () => ({ className: "audit-detail-head-submitted" }),
+          render: (value: number) => <span className="font-mono">{formatCurrency(value)}</span>,
+        },
+      ],
+    },
+    {
+      title: "审核",
+      align: "center",
+      onHeaderCell: () => ({ className: "audit-detail-head-reviewed" }),
+      children: [
+        {
+          title: "计量单位",
+          dataIndex: "reviewedUnit",
+          width: 96,
+          align: "center",
+          onHeaderCell: () => ({ className: "audit-detail-head-reviewed" }),
+        },
+        {
+          title: "单价（元）",
+          dataIndex: "reviewedUnitPrice",
+          width: 116,
+          align: "center",
+          onHeaderCell: () => ({ className: "audit-detail-head-reviewed" }),
+          render: (value: number) => <span className="font-mono">{formatCurrency(value)}</span>,
+        },
+        {
+          title: "数量",
+          dataIndex: "reviewedQuantity",
+          width: 86,
+          align: "center",
+          onHeaderCell: () => ({ className: "audit-detail-head-reviewed" }),
+        },
+        {
+          title: "天数",
+          dataIndex: "reviewedDays",
+          width: 86,
+          align: "center",
+          onHeaderCell: () => ({ className: "audit-detail-head-reviewed" }),
+        },
+        {
+          title: "审核金额（元）",
+          dataIndex: "reviewedAmount",
+          width: 136,
+          align: "center",
+          onHeaderCell: () => ({ className: "audit-detail-head-reviewed" }),
+          render: (value: number) => <span className="font-mono text-slate-500">{formatCurrency(value)}</span>,
+        },
+        {
+          title: "审减金额（元）",
+          dataIndex: "reductionAmount",
+          width: 136,
+          align: "center",
+          onHeaderCell: () => ({ className: "audit-detail-head-reviewed" }),
+          render: (value: number) => <span className="font-mono text-red-600">{formatCurrency(value)}</span>,
+        },
+      ],
+    },
+  ]
+
   const columns: ColumnsType<AuditRow> = [
     { title: "序号", dataIndex: "index", width: 78 },
     { title: "项目名称", dataIndex: "item", ellipsis: true },
@@ -150,6 +260,27 @@ const AuditAnalysisPage = () => {
       dataIndex: "status",
       width: 120,
       render: (value: AmountStatus) => statusTag(value),
+    },
+    {
+      title: "详情",
+      width: 100,
+      render: (_value, record) => {
+        const expanded = expandedRowKey === record.key
+        return (
+          <Button
+            type="link"
+            className="audit-detail-trigger"
+            onClick={() => {
+              setExpandedRowKey(expanded ? null : record.key)
+            }}
+          >
+            <span className="audit-detail-trigger-content">
+              {expanded ? "收起详情" : "查看详情"}
+              {expanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+            </span>
+          </Button>
+        )
+      },
     },
   ]
 
@@ -231,6 +362,22 @@ const AuditAnalysisPage = () => {
                   rowKey="key"
                   columns={columns}
                   dataSource={auditRows}
+                  expandable={{
+                    showExpandColumn: false,
+                    expandedRowKeys: expandedRowKey ? [expandedRowKey] : [],
+                    expandedRowRender: (record) => (
+                      <Table<AuditDetailRow>
+                        className="audit-detail-table"
+                        rowKey="key"
+                        columns={detailColumns}
+                        dataSource={record.details}
+                        pagination={false}
+                        size="small"
+                        bordered
+                        scroll={{ x: 1200 }}
+                      />
+                    ),
+                  }}
                   pagination={false}
                   size="small"
                   scroll={{ y: tableScrollY }}

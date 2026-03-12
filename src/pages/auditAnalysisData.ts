@@ -1,5 +1,20 @@
 export type AmountStatus = "normal" | "warning" | "danger"
 
+export type AuditDetailRow = {
+  key: string
+  submittedUnit: string
+  submittedUnitPrice: number
+  submittedQuantity: number
+  submittedDays: number
+  submittedAmount: number
+  reviewedUnit: string
+  reviewedUnitPrice: number
+  reviewedQuantity: number
+  reviewedDays: number
+  reviewedAmount: number
+  reductionAmount: number
+}
+
 export type AuditRow = {
   key: number
   index: number
@@ -7,6 +22,7 @@ export type AuditRow = {
   declared: number
   ai: number
   status: AmountStatus
+  details: AuditDetailRow[]
 }
 
 export type AuditIssue = {
@@ -19,7 +35,7 @@ export type AuditIssue = {
   analysis: string
 }
 
-export const auditRows: AuditRow[] = [
+const auditRowsBase: Omit<AuditRow, "details">[] = [
   { key: 1, index: 1, item: "展台搭建费", declared: 180000, ai: 165000, status: "normal" },
   { key: 2, index: 2, item: "展板制作费", declared: 45000, ai: 42000, status: "normal" },
   { key: 3, index: 3, item: "音响设备租赁", declared: 68000, ai: 65000, status: "normal" },
@@ -51,6 +67,39 @@ export const auditRows: AuditRow[] = [
   { key: 29, index: 28, item: "办公设备租赁15", declared: 12000, ai: 11000, status: "normal" },
   { key: 30, index: 29, item: "办公设备租赁16", declared: 12000, ai: 11000, status: "normal" },
 ]
+
+const buildDetailRows = (row: Omit<AuditRow, "details">): AuditDetailRow[] => {
+  const unit = row.item.includes("租赁")
+    ? "天"
+    : row.item.includes("搭建") || row.item.includes("制作") || row.item.includes("铺设")
+      ? "平米"
+      : "项"
+  const submittedQuantity = unit === "项" ? 1 : (row.key % 4 + 2) * 10
+  const submittedDays = unit === "天" ? (row.key % 3) + 2 : (row.key % 2) + 1
+  const divisor = Math.max(submittedQuantity * submittedDays, 1)
+
+  return [
+    {
+      key: `${row.key}-1`,
+      submittedUnit: unit,
+      submittedUnitPrice: Math.max(1, Math.round(row.declared / divisor)),
+      submittedQuantity,
+      submittedDays,
+      submittedAmount: row.declared,
+      reviewedUnit: unit,
+      reviewedUnitPrice: Math.max(1, Math.round(row.ai / divisor)),
+      reviewedQuantity: submittedQuantity,
+      reviewedDays: submittedDays,
+      reviewedAmount: row.ai,
+      reductionAmount: row.declared - row.ai,
+    },
+  ]
+}
+
+export const auditRows: AuditRow[] = auditRowsBase.map((row) => ({
+  ...row,
+  details: buildDetailRows(row),
+}))
 
 export const auditIssues: AuditIssue[] = [
   {
