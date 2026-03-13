@@ -30,10 +30,19 @@ import { clearAuth } from "../store/authSlice"
 import client from "../api/client"
 import type { ChangePasswordResponse, LogoutResponse } from "../types/auth"
 import { PASSWORD_RULE_TEXT, isStrongPassword } from "../utils/password"
-import "./DashboardHome.audit.css"
+import { formatDateTime } from "../utils/date"
+import "../styles/pages/DashboardHome.audit.css"
 
-const venueOptionsByCity: Record<string, string[]> = {
-  天津: ["天津梅江会展中心", "国家会展中心(天津)"],
+const projectTypeOptions = [
+  { label: "临时展会", value: 0 },
+  { label: "常设陈列", value: 1 },
+]
+
+const venueOptionsByCity: Record<string, { label: string; value: number }[]> = {
+  天津: [
+    { label: "天津梅江会展中心", value: 0 },
+    { label: "国家会展中心(天津)", value: 1 },
+  ],
 }
 const FIXED_CITY = "天津"
 
@@ -56,12 +65,13 @@ const DashboardHome = () => {
   const email = (user && (user as Record<string, unknown>)["email"]) as string | undefined
   const phone = (user && (user as Record<string, unknown>)["phone"]) as string | undefined
   const dept = (user && (user as Record<string, unknown>)["dept"]) as string | undefined
+  const lastLogin = (user && (user as Record<string, unknown>)["last_login"]) as string | undefined
 
   useEffect(() => {
     projectForm.setFieldsValue({
       city: FIXED_CITY,
-      projectType: "临时展会",
-      venue: "天津梅江会展中心",
+      projectType: 0,
+      venue: 0,
     })
     const timer = window.setTimeout(() => {
       setUploadedFile({ name: "展会预算清单_2024.xlsx", size: "2.4 MB" })
@@ -193,15 +203,18 @@ const DashboardHome = () => {
             </Form.Item>
             <Form.Item label="项目性质" name="projectType">
               <Radio.Group className="audit-venue-group">
-                <Radio value="临时展会">临时展会</Radio>
-                <Radio value="常设陈列">常设陈列</Radio>
+                {projectTypeOptions.map((item) => (
+                  <Radio key={item.value} value={item.value}>
+                    {item.label}
+                  </Radio>
+                ))}
               </Radio.Group>
             </Form.Item>
             <Form.Item label="目标场馆" name="venue">
               <Radio.Group className="audit-venue-group">
                 {currentVenueOptions.map((venue) => (
-                  <Radio key={venue} value={venue}>
-                    {venue}
+                  <Radio key={venue.value} value={venue.value}>
+                    {venue.label}
                   </Radio>
                 ))}
               </Radio.Group>
@@ -308,6 +321,8 @@ const DashboardHome = () => {
           <Typography.Text type="secondary">手机号：{phone || "未设置"}</Typography.Text>
           <br />
           <Typography.Text type="secondary">所属部门：{dept || "默认部门"}</Typography.Text>
+          <br />
+          <Typography.Text type="secondary">上次登录时间：{formatDateTime(lastLogin)}</Typography.Text>
         </div>
         <Form
           form={profileForm}

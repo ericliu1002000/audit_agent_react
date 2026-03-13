@@ -1,39 +1,4 @@
-export type AmountStatus = "normal" | "warning" | "danger"
-
-export type AuditDetailRow = {
-  key: string
-  submittedUnit: string
-  submittedUnitPrice: number
-  submittedQuantity: number
-  submittedDays: number
-  submittedAmount: number
-  reviewedUnit: string
-  reviewedUnitPrice: number
-  reviewedQuantity: number
-  reviewedDays: number
-  reviewedAmount: number
-  reductionAmount: number
-}
-
-export type AuditRow = {
-  key: number
-  index: number
-  item: string
-  declared: number
-  ai: number
-  status: AmountStatus
-  details: AuditDetailRow[]
-}
-
-export type AuditIssue = {
-  key: number
-  title: string
-  level: "异常" | "警告"
-  rowIndex: number
-  declared: number
-  suggestion: number
-  analysis: string
-}
+import type { AuditDetailRow, AuditIssue, AuditRow } from "../types/auditAnalysis"
 
 const auditRowsBase: Omit<AuditRow, "details">[] = [
   { key: 1, index: 1, item: "展台搭建费", declared: 180000, ai: 165000, status: "normal" },
@@ -157,5 +122,3 @@ export const auditIssues: AuditIssue[] = [
     analysis: "清洁服务费用高于同类展馆均价，建议按面积单价复核。",
   },
 ]
-
-export const formatCurrency = (value: number) => `¥${value.toLocaleString("zh-CN")}`

@@ -13,9 +13,10 @@ import {
 import { Button, Card, List, Progress, Statistic, Steps, Table, Tag, Typography } from "antd"
 import type { ColumnsType } from "antd/es/table"
 import { useNavigate } from "react-router-dom"
-import { auditIssues, auditRows, formatCurrency } from "./auditAnalysisData"
-import type { AmountStatus, AuditDetailRow, AuditRow } from "./auditAnalysisData"
-import "./AuditAnalysisPage.css"
+import { auditIssues, auditRows } from "../data/auditAnalysis"
+import type { AmountStatus, AuditDetailRow, AuditRow } from "../types/auditAnalysis"
+import { formatCurrency } from "../utils/currency"
+import "../styles/pages/AuditAnalysisPage.css"
 
 type ViewState = "processing" | "result"
 
