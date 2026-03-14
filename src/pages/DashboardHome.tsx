@@ -29,6 +29,7 @@ import { useAppDispatch, useAppSelector } from "../store"
 import { clearAuth } from "../store/authSlice"
 import client from "../api/client"
 import type { ChangePasswordResponse, LogoutResponse } from "../types/auth"
+import type { PriceAuditSubmissionResponse } from "../types/priceAudit"
 import { PASSWORD_RULE_TEXT, isStrongPassword } from "../utils/password"
 import { formatDateTime } from "../utils/date"
 import "../styles/pages/DashboardHome.audit.css"
@@ -55,11 +56,12 @@ const DashboardHome = () => {
   const [changeForm] = Form.useForm()
   const [profileForm] = Form.useForm()
   const [feedbackForm] = Form.useForm()
-  const [uploadedFile, setUploadedFile] = useState<{ name: string; size: string } | null>(null)
+  const [uploadedFile, setUploadedFile] = useState<{ raw: File; name: string; size: string } | null>(null)
   const [showProfile, setShowProfile] = useState(false)
   const [showFeedback, setShowFeedback] = useState(false)
   const [showChangePwd, setShowChangePwd] = useState(false)
   const [changeLoading, setChangeLoading] = useState(false)
+  const [submitLoading, setSubmitLoading] = useState(false)
   const [changeSuccess, setChangeSuccess] = useState(false)
   const [countdown, setCountdown] = useState(3)
   const email = (user && (user as Record<string, unknown>)["email"]) as string | undefined
@@ -73,12 +75,6 @@ const DashboardHome = () => {
       projectType: 0,
       venue: 0,
     })
-    const timer = window.setTimeout(() => {
-      setUploadedFile({ name: "展会预算清单_2024.xlsx", size: "2.4 MB" })
-    }, 800)
-    return () => {
-      window.clearTimeout(timer)
-    }
   }, [projectForm])
 
   useEffect(() => {
@@ -166,6 +162,7 @@ const DashboardHome = () => {
         return Upload.LIST_IGNORE
       }
       setUploadedFile({
+        raw: file,
         name: file.name,
         size: `${sizeInMb.toFixed(1)} MB`,
       })
@@ -174,9 +171,39 @@ const DashboardHome = () => {
     },
   }
 
-  const startAnalysis = () => {
+  const startAnalysis = async () => {
     if (!uploadedFile) return
-    navigate("/audit-analysis")
+    const values = projectForm.getFieldsValue(["venue", "projectType"]) as { venue?: number; projectType?: number }
+    if (typeof values.venue !== "number" || typeof values.projectType !== "number") {
+      message.warning("请先选择项目参数")
+      return
+    }
+    try {
+      setSubmitLoading(true)
+      const formData = new FormData()
+      formData.append("file", uploadedFile.raw)
+      formData.append("exhibition_center_id", String(values.venue))
+      formData.append("project_nature", String(values.projectType))
+      const { data } = await client.post<PriceAuditSubmissionResponse>("/v1/price-audit/submissions/", formData)
+      if (!data.success) {
+        message.error(data.message || "上传失败")
+        return
+      }
+      message.success(data.message || "上传成功")
+      console.log("上传文件==",data)
+      navigate("/audit-analysis", {
+        state: {
+          submissionId: data.data.id,
+          exhibitionCenterId: values.venue,
+          projectNature: values.projectType,
+        },
+      })
+    } catch (e) {
+      const err = e as { response?: { data?: { message?: string; error?: { message?: string } } } }
+      message.error(err.response?.data?.error?.message || err.response?.data?.message || "上传失败")
+    } finally {
+      setSubmitLoading(false)
+    }
   }
 
   return (
@@ -290,6 +317,7 @@ const DashboardHome = () => {
                   size="large"
                   className="audit-analyze-btn"
                   disabled={!uploadedFile}
+                  loading={submitLoading}
                   icon={<Sparkles className="w-4 h-4" />}
                   onClick={startAnalysis}
                 >

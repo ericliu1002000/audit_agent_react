@@ -79,11 +79,44 @@
   gap: 14px;
 }
 
+.audit-project-meta {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.audit-project-meta-item {
+  border-radius: 12px;
+  border: 1px solid #dbeafe;
+  background: linear-gradient(135deg, #f8fbff 0%, #ffffff 100%);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.audit-project-meta-label {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.audit-project-meta-value {
+  font-size: 14px;
+  color: #0f172a;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .audit-metric-card {
   border-radius: 16px !important;
   border: 1px solid #e2e8f0 !important;
   box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04) !important;
   transition: all 0.3s ease;
+  cursor: pointer;
 }
 
 .audit-metric-card:hover {
@@ -164,6 +197,59 @@
 .audit-table-card .ant-table-wrapper {
   flex: 1;
   min-height: 0;
+}
+
+.audit-thinking-panel {
+  margin: 0 12px 10px;
+  border-radius: 12px;
+  border: 1px solid #bfdbfe;
+  background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);
+  padding: 10px 12px;
+}
+
+.audit-thinking-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e3a8a;
+}
+
+.audit-thinking-list {
+  margin-top: 8px;
+  max-height: 132px;
+  overflow: auto;
+  padding-right: 2px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.audit-thinking-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12px;
+  color: #334155;
+  line-height: 1.5;
+}
+
+.audit-thinking-time {
+  color: #64748b;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  white-space: nowrap;
+}
+
+.audit-thinking-message {
+  flex: 1;
+  min-width: 0;
+}
+
+.audit-thinking-empty {
+  margin: 0;
+  font-size: 12px;
+  color: #64748b;
 }
 
 .audit-row-warning td {
@@ -333,6 +419,7 @@
     min-height: auto;
     height: auto;
   }
+  .audit-project-meta,
   .audit-metric-grid,
   .audit-result-main {
     grid-template-columns: 1fr;

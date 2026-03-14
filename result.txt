@@ -1,0 +1,863 @@
+{
+    "success": true,
+    "data": {
+        "id": 7,
+        "status": "processing",
+        "current_step": "reviewing",
+        "progress_percent": 10,
+        "total_rows": 35,
+        "processed_rows": 0,
+        "failed_rows": 0,
+        "current_message": "已解析送审表，待审核 35 条明细。",
+        "project_name": "评审表样例",
+        "original_filename": "评审表样例.xlsx",
+        "exhibition_center_id": 0,
+        "exhibition_center_name": "天津梅江会展中心",
+        "project_nature": 0,
+        "project_nature_name": "临时展会",
+        "submitted_total_amount": null,
+        "reviewed_total_amount": null,
+        "reduction_total_amount": null,
+        "report_json": {},
+        "error_message": "",
+        "created_at": "2026-03-14T18:56:16.314813+08:00",
+        "updated_at": "2026-03-14T18:56:16.695216+08:00",
+        "detail_url": "http://gvmt.dagimed.com/api/v1/price-audit/submissions/7/",
+        "rows_url": "http://gvmt.dagimed.com/api/v1/price-audit/submissions/7/rows/",
+        "audited_excel_download_url": null
+    }
+}
+{
+    "success": true,
+    "data": {
+        "id": 7,
+        "status": "processing",
+        "current_step": "reviewing",
+        "progress_percent": 12,
+        "total_rows": 35,
+        "processed_rows": 1,
+        "failed_rows": 0,
+        "current_message": "正在审核第 1/35 条明细：场地租",
+        "project_name": "评审表样例",
+        "original_filename": "评审表样例.xlsx",
+        "exhibition_center_id": 0,
+        "exhibition_center_name": "天津梅江会展中心",
+        "project_nature": 0,
+        "project_nature_name": "临时展会",
+        "submitted_total_amount": null,
+        "reviewed_total_amount": null,
+        "reduction_total_amount": null,
+        "report_json": {},
+        "error_message": "",
+        "created_at": "2026-03-14T18:56:16.314813+08:00",
+        "updated_at": "2026-03-14T18:57:06.442784+08:00",
+        "detail_url": "http://gvmt.dagimed.com/api/v1/price-audit/submissions/7/",
+        "rows_url": "http://gvmt.dagimed.com/api/v1/price-audit/submissions/7/rows/",
+        "audited_excel_download_url": null
+    }
+}
+{
+    "success": true,
+    "data": {
+        "id": 7,
+        "status": "processing",
+        "current_step": "reviewing",
+        "progress_percent": 14,
+        "total_rows": 35,
+        "processed_rows": 2,
+        "failed_rows": 0,
+        "current_message": "正在审核第 2/35 条明细：特装展台-地台制作",
+        "project_name": "评审表样例",
+        "original_filename": "评审表样例.xlsx",
+        "exhibition_center_id": 0,
+        "exhibition_center_name": "天津梅江会展中心",
+        "project_nature": 0,
+        "project_nature_name": "临时展会",
+        "submitted_total_amount": null,
+        "reviewed_total_amount": null,
+        "reduction_total_amount": null,
+        "report_json": {},
+        "error_message": "",
+        "created_at": "2026-03-14T18:56:16.314813+08:00",
+        "updated_at": "2026-03-14T18:57:49.918417+08:00",
+        "detail_url": "http://gvmt.dagimed.com/api/v1/price-audit/submissions/7/",
+        "rows_url": "http://gvmt.dagimed.com/api/v1/price-audit/submissions/7/rows/",
+        "audited_excel_download_url": null
+    }
+}
+{
+    "success": true,
+    "data": {
+        "id": 7,
+        "status": "completed",
+        "current_step": "completed",
+        "progress_percent": 100,
+        "total_rows": 35,
+        "processed_rows": 35,
+        "failed_rows": 0,
+        "current_message": "审核完成，审核表已生成。",
+        "project_name": "评审表样例",
+        "original_filename": "评审表样例.xlsx",
+        "exhibition_center_id": 0,
+        "exhibition_center_name": "天津梅江会展中心",
+        "project_nature": 0,
+        "project_nature_name": "临时展会",
+        "submitted_total_amount": "599403.5520",
+        "reviewed_total_amount": "599403.5520",
+        "reduction_total_amount": "0.0000",
+        "report_json": {
+            "rows": [
+                {
+                    "row_id": 130,
+                    "decision": {
+                        "reason": "送审单价9元/天/平米，租期3天（包括搭建、布置和正式活动），面积1925平米，总金额51975元。经查询标准价格库，未找到天津梅江会展中心场地租金的可靠市场价格依据。根据项目性质（临时展会）和预算说明（需提前搭建布置），送审价格合理，保持原值不变。",
+                        "status": "completed",
+                        "result_type": "unchanged",
+                        "error_message": "",
+                        "reviewed_amount": "51975.0000",
+                        "reduction_amount": "0.0000"
+                    },
+                    "fee_type": "场地租",
+                    "row_type": "leaf",
+                    "sequence_no": "1",
+                    "excel_row_no": 3,
+                    "submitted_amount": "51975.0000",
+                    "parent_sequence_no": ""
+                },
+                {
+                    "row_id": 131,
+                    "decision": {
+                        "reason": "由子项审核结果自动汇总生成。",
+                        "status": "completed",
+                        "result_type": "aggregated",
+                        "error_message": "",
+                        "reviewed_amount": "220440.0000",
+                        "reduction_amount": "0.0000"
+                    },
+                    "fee_type": "特装展台搭建",
+                    "row_type": "group",
+                    "sequence_no": "2",
+                    "excel_row_no": 4,
+                    "submitted_amount": "220440.0000",
+                    "parent_sequence_no": ""
+                },
+                {
+                    "row_id": 132,
+                    "decision": {
+                        "reason": "缺乏直接可比的市场价格依据。送审单价140元/㎡相对于木质活动地板279.67元/㎡的基准价较低，且预算说明详细描述了E1级实木多层板（18mm厚）和实木龙骨支撑的规格要求。考虑到天津梅江会展中心临时展会项目的特殊性，以及地台制作包含材料、人工、安装等综合成本，暂不调整送审价格。",
+                        "status": "completed",
+                        "result_type": "unchanged",
+                        "error_message": "",
+                        "reviewed_amount": "30240.0000",
+                        "reduction_amount": "0.0000"
+                    },
+                    "fee_type": "特装展台-地台制作",
+                    "row_type": "leaf",
+                    "sequence_no": "2.1",
+                    "excel_row_no": 5,
+                    "submitted_amount": "30240.0000",
+                    "parent_sequence_no": "2"
+                },
+                {
+                    "row_id": 133,
+                    "decision": {
+                        "reason": "送审单价85元/㎡在铝合金条板市场价格区间73.62-91.00元/㎡内，接近基准价84.49元/㎡。项目为天津梅江会展中心临时展会，预算说明中描述采用铝合金收边条（5cm宽，10cm高）配合定制弧形转角件、卡扣式固定和结构胶加固，工艺要求较高。缺乏完全匹配的'特装展台-地台包边'标准价格依据，送审价格在合理范围内，建议保留原值。",
+                        "status": "completed",
+                        "result_type": "unchanged",
+                        "error_message": "",
+                        "reviewed_amount": "18360.0000",
+                        "reduction_amount": "0.0000"
+                    },
+                    "fee_type": "特装展台-地台包边",
+                    "row_type": "leaf",
+                    "sequence_no": "2.2",
+                    "excel_row_no": 6,
+                    "submitted_amount": "18360.0000",
+                    "parent_sequence_no": "2"
+                },
+                {
+                    "row_id": 134,
+                    "decision": {
+                        "reason": "送审单价240元/㎡为特装展台板墙结构（涂料板墙）综合单价，包含E1级板材、环保涂料及人工安装等费用。查询标准价库未找到直接可比的市场价格依据，现有查询结果主要为材料单价，不能完全代表综合搭建成本。考虑到天津梅江会展中心临时展会项目特点及预算说明中'成本适中'的描述，在缺乏可靠证据情况下，保持送审值不变。",
+                        "status": "completed",
+                        "result_type": "unchanged",
+                        "error_message": "",
+                        "reviewed_amount": "51840.0000",
+                        "reduction_amount": "0.0000"
+                    },
+                    "fee_type": "特装展台-板墙结构（涂料板墙）",
+                    "row_type": "leaf",
+                    "sequence_no": "2.3",
+                    "excel_row_no": 7,
+                    "submitted_amount": "51840.0000",
+                    "parent_sequence_no": "2"
+                },
+                {
+                    "row_id": 135,
+                    "decision": {
+                        "reason": "该产品为定制化特装展台接待台，包含基础钢结构、密度板、烤漆工艺及LED灯带装饰等多种材料和工艺，尺寸为2.4m*0.6m*0.9m。由于缺乏直接可比的市场价格依据，且考虑到临时展会项目的定制化需求和快速拆装特性，保持送审值不变。",
+                        "status": "completed",
+                        "result_type": "unchanged",
+                        "error_message": "",
+                        "reviewed_amount": "17560.0000",
+                        "reduction_amount": "0.0000"
+                    },
+                    "fee_type": "特装展台-接待台（简易烤漆款）",
+                    "row_type": "leaf",
+                    "sequence_no": "2.4",
+                    "excel_row_no": 8,
+                    "submitted_amount": "17560.0000",
+                    "parent_sequence_no": "2"
+                },
+                {
+                    "row_id": 136,
+                    "decision": {
+                        "reason": "送审单价75元/㎡为特装展台环保写真布喷绘画面价格，采用环保无气味油墨。经查询标准价格数据库，未找到直接可比的市场价格依据。考虑到天津梅江会展中心临时展会项目对视觉效果和环保材料的要求，且预算说明合理，缺乏可靠审减证据，故维持原值。",
+                        "status": "completed",
+                        "result_type": "unchanged",
+                        "error_message": "",
+                        "reviewed_amount": "16200.0000",
+                        "reduction_amount": "0.0000"
+                    },
+                    "fee_type": "特装展台-喷绘画面（环保写真布）",
+                    "row_type": "leaf",
+                    "sequence_no": "2.5",
+                    "excel_row_no": 9,
+                    "submitted_amount": "16200.0000",
+                    "parent_sequence_no": "2"
+                },
+                {
+                    "row_id": 137,
+                    "decision": {
+                        "reason": "缺乏LED屏幕在展会租赁方面的可靠市场价格依据。送审价格285元/平方米用于特装展台LED屏幕集成，符合天津梅江会展中心临时展会项目需求，用于展示参展企业视频内容，提升展台效果。在缺乏可靠市场证据的情况下，保持原送审值不变。",
+                        "status": "completed",
+                        "result_type": "unchanged",
+                        "error_message": "",
+                        "reviewed_amount": "20520.0000",
+                        "reduction_amount": "0.0000"
+                    },
+                    "fee_type": "特装展台-LED屏幕",
+                    "row_type": "leaf",
+                    "sequence_no": "2.6",
+                    "excel_row_no": 10,
+                    "submitted_amount": "20520.0000",
+                    "parent_sequence_no": "2"
+                },
+                {
+                    "row_id": 138,
+                    "decision": {
+                        "reason": "缺乏可靠的市场价格依据来评估桌椅套装价格合理性。该费用为天津梅江会展中心临时展会特装展台接待区配置（0.8m圆桌配2把0.75m椅子），总金额1120元相对合理，且作为特装展台搭建的一部分可能包含相关服务费用。",
+                        "status": "completed",
+                        "result_type": "unchanged",
+                        "error_message": "",
+                        "reviewed_amount": "1120.0000",
+                        "reduction_amount": "0.0000"
+                    },
+                    "fee_type": "特装展台-桌椅套装",
+                    "row_type": "leaf",
+                    "sequence_no": "2.7",
+                    "excel_row_no": 11,
+                    "submitted_amount": "1120.0000",
+                    "parent_sequence_no": "2"
+                },
+                {
+                    "row_id": 139,
+                    "decision": {
+                        "reason": "送审单价30元/个用于特装展台基础照明，经查询缺乏展会射灯直接市场价格依据。搜索结果中相关照明设备价格区间为68-240元，送审价格相对合理。天津梅江会展中心临时展会项目，选用常规展会射灯满足基础照明需求，符合项目性质。",
+                        "status": "completed",
+                        "result_type": "unchanged",
+                        "error_message": "",
+                        "reviewed_amount": "1800.0000",
+                        "reduction_amount": "0.0000"
+                    },
+                    "fee_type": "特装展台-基础照明（射灯）",
+                    "row_type": "leaf",
+                    "sequence_no": "2.8",
+                    "excel_row_no": 12,
+                    "submitted_amount": "1800.0000",
+                    "parent_sequence_no": "2"
+                },
+                {
+                    "row_id": 140,
+                    "decision": {
+                        "reason": "送审价格1200元/项为特装展台基础电源及布线综合服务费，包含小型电箱、电线、线槽等材料及安装，需符合展馆用电规范。经查询标准价库，未找到直接可比的服务价格，缺乏可靠证据证明价格不合理。考虑到天津梅江会展中心临时展会性质及服务综合性，暂维持原值。",
+                        "status": "completed",
+                        "result_type": "unchanged",
+                        "error_message": "",
+                        "reviewed_amount": "4800.0000",
+                        "reduction_amount": "0.0000"
+                    },
+                    "fee_type": "特装展台-基础电源及布线",
+                    "row_type": "leaf",
+                    "sequence_no": "2.9",
+                    "excel_row_no": 13,
+                    "submitted_amount": "4800.0000",
+                    "parent_sequence_no": "2"
+                },
+                {
+                    "row_id": 141,
+                    "decision": {
+                        "reason": "缺乏简易展架（产品陈列用）的可靠市场价格依据。送审单价200元/个用于可折叠金属展架在天津梅江会展中心临时展会场景下可能合理，且属于特装展台搭建的必要组成部分，用于四省市特色劳务品牌展台的产品陈列展示。",
+                        "status": "completed",
+                        "result_type": "unchanged",
+                        "error_message": "",
+                        "reviewed_amount": "9600.0000",
+                        "reduction_amount": "0.0000"
+                    },
+                    "fee_type": "特装展台-简易展架（产品陈列用）",
+                    "row_type": "leaf",
+                    "sequence_no": "2.10",
+                    "excel_row_no": 14,
+                    "submitted_amount": "9600.0000",
+                    "parent_sequence_no": "2"
+                },
+                {
+                    "row_id": 142,
+                    "decision": {
+                        "reason": "该费用为特装展台工厂前期加工人工费用，涵盖板材切割、接待台预制、喷绘画面制作等定制化服务。经查询标准价库，未找到直接可比的市场价格依据。考虑到天津梅江会展中心临时展会项目的特殊性及工艺复杂度，且送审单价2500元/项在特装展台搭建总体预算中占比合理，缺乏可靠审减依据，故维持原值。",
+                        "status": "completed",
+                        "result_type": "unchanged",
+                        "error_message": "",
+                        "reviewed_amount": "10000.0000",
+                        "reduction_amount": "0.0000"
+                    },
+                    "fee_type": "特装展台-工厂制作人工",
+                    "row_type": "leaf",
+                    "sequence_no": "2.11",
+                    "excel_row_no": 15,
+                    "submitted_amount": "10000.0000",
+                    "parent_sequence_no": "2"
+                },
+                {
+                    "row_id": 143,
+                    "decision": {
+                        "reason": "缺乏可靠的市场价格依据。送审说明中提及人工单价参考天津本地展会均价，且特装展台搭建需要专业技能（木工、电工各3人），天津作为一线城市，临时展会搭建人工费用相对合理。经查询标准价数据库，未找到相关人工费用的可靠市场价格证据，故保持原值不变。",
+                        "status": "completed",
+                        "result_type": "unchanged",
+                        "error_message": "",
+                        "reviewed_amount": "28800.0000",
+                        "reduction_amount": "0.0000"
+                    },
+                    "fee_type": "特装展台-现场搭建及拆除人工",
+                    "row_type": "leaf",
+                    "sequence_no": "2.12",
+                    "excel_row_no": 16,
+                    "submitted_amount": "28800.0000",
+                    "parent_sequence_no": "2"
+                },
+                {
+                    "row_id": 144,
+                    "decision": {
+                        "reason": "送审价格1200元/次往返（含2辆4.2米货车往返运输及装卸费）在天津梅江会展中心临时展会项目中属于合理范围。经查询标准价库，缺乏可靠的运输费用市场价格依据，无法确定审减依据，故保持原值不变。",
+                        "status": "completed",
+                        "result_type": "unchanged",
+                        "error_message": "",
+                        "reviewed_amount": "9600.0000",
+                        "reduction_amount": "0.0000"
+                    },
+                    "fee_type": "特装展台-本地运输费",
+                    "row_type": "leaf",
+                    "sequence_no": "2.13",
+                    "excel_row_no": 17,
+                    "submitted_amount": "9600.0000",
+                    "parent_sequence_no": "2"
+                },
+                {
+                    "row_id": 145,
+                    "decision": {
+                        "reason": "由子项审核结果自动汇总生成。",
+                        "status": "completed",
+                        "result_type": "aggregated",
+                        "error_message": "",
+                        "reviewed_amount": "164500.0000",
+                        "reduction_amount": "0.0000"
+                    },
+                    "fee_type": "普通展台搭建",
+                    "row_type": "group",
+                    "sequence_no": "3",
+                    "excel_row_no": 18,
+                    "submitted_amount": "164500.0000",
+                    "parent_sequence_no": ""
+                },
+                {
+                    "row_id": 146,
+                    "decision": {
+                        "reason": "送审价格85元/㎡在铝合金方板市场价格区间（80.23-89.27元/㎡）内，且略低于基准价85.33元/㎡。考虑到天津梅江会展中心临时展会性质，展板需符合E1级环保标准，缺乏展会搭建综合服务的明确市场价格依据，保持原值不变。",
+                        "status": "completed",
+                        "result_type": "unchanged",
+                        "error_message": "",
+                        "reviewed_amount": "35955.0000",
+                        "reduction_amount": "0.0000"
+                    },
+                    "fee_type": "普通展台-标准展板",
+                    "row_type": "leaf",
+                    "sequence_no": "3.1",
+                    "excel_row_no": 19,
+                    "submitted_amount": "35955.0000",
+                    "parent_sequence_no": "3"
+                },
+                {
+                    "row_id": 147,
+                    "decision": {
+                        "reason": "缺乏简易接待台可靠市场价格依据。送审单价500元/个包含密度板材料及基础喷漆工艺，在天津梅江会展中心临时展会项目中属合理范围。根据审核原则，无可靠证据时保持原值。",
+                        "status": "completed",
+                        "result_type": "unchanged",
+                        "error_message": "",
+                        "reviewed_amount": "23500.0000",
+                        "reduction_amount": "0.0000"
+                    },
+                    "fee_type": "普通展台-简易接待台",
+                    "row_type": "leaf",
+                    "sequence_no": "3.2",
+                    "excel_row_no": 20,
+                    "submitted_amount": "23500.0000",
+                    "parent_sequence_no": "3"
+                },
+                {
+                    "row_id": 148,
+                    "decision": {
+                        "reason": "经查询标准价库，未找到喷绘画面（环保写真布）的可靠市场价格依据。送审单价75元/㎡在天津梅江会展中心临时展会项目中属于合理范围，且预算说明明确为品牌宣传用环保写真布，故保持原值不变。",
+                        "status": "completed",
+                        "result_type": "unchanged",
+                        "error_message": "",
+                        "reviewed_amount": "31725.0000",
+                        "reduction_amount": "0.0000"
+                    },
+                    "fee_type": "普通展台-喷绘画面",
+                    "row_type": "leaf",
+                    "sequence_no": "3.3",
+                    "excel_row_no": 21,
+                    "submitted_amount": "31725.0000",
+                    "parent_sequence_no": "3"
+                },
+                {
+                    "row_id": 149,
+                    "decision": {
+                        "reason": "缺乏直接可比的展会射灯市场价格依据。送审单价30元/个在照明设备中属于合理范围，且为天津梅江会展中心临时展会项目的基础照明需求，符合项目性质。",
+                        "status": "completed",
+                        "result_type": "unchanged",
+                        "error_message": "",
+                        "reviewed_amount": "7050.0000",
+                        "reduction_amount": "0.0000"
+                    },
+                    "fee_type": "普通展台-基础照明（射灯）",
+                    "row_type": "leaf",
+                    "sequence_no": "3.4",
+                    "excel_row_no": 22,
+                    "submitted_amount": "7050.0000",
+                    "parent_sequence_no": "3"
+                },
+                {
+                    "row_id": 150,
+                    "decision": {
+                        "reason": "送审价格450元/项为基础电源及布线综合服务费，包含布线、插座安装及符合展馆用电规范的施工。经查询标准价格库，未找到直接匹配的综合性服务项目作为审减依据。考虑到天津梅江会展中心临时展会的特殊性及专业施工要求，保持原值不变。",
+                        "status": "completed",
+                        "result_type": "unchanged",
+                        "error_message": "",
+                        "reviewed_amount": "21150.0000",
+                        "reduction_amount": "0.0000"
+                    },
+                    "fee_type": "普通展台-基础电源及布线",
+                    "row_type": "leaf",
+                    "sequence_no": "3.5",
+                    "excel_row_no": 23,
+                    "submitted_amount": "21150.0000",
+                    "parent_sequence_no": "3"
+                },
+                {
+                    "row_id": 151,
+                    "decision": {
+                        "reason": "缺乏直接的市场价格依据。该费用涵盖板材切割、接待台预制、喷绘画面制作等多项工厂前期加工工作，按项目打包核算。在天津梅江会展中心临时展会背景下，单价300元/项相对合理，且占总展台搭建费用比例适当，故保持原值。",
+                        "status": "completed",
+                        "result_type": "unchanged",
+                        "error_message": "",
+                        "reviewed_amount": "14100.0000",
+                        "reduction_amount": "0.0000"
+                    },
+                    "fee_type": "普通展台-工厂制作人工",
+                    "row_type": "leaf",
+                    "sequence_no": "3.6",
+                    "excel_row_no": 24,
+                    "submitted_amount": "14100.0000",
+                    "parent_sequence_no": "3"
+                },
+                {
+                    "row_id": 152,
+                    "decision": {
+                        "reason": "经查询标准价库，未能找到天津地区展会搭建人工费用的可靠市场价格依据。送审单价150元/人参考天津本地展会均价，考虑到木工、电工等专业技能要求，在天津梅江会展中心临时展会项目中属于合理范围。计算正确：150×47×3=21150元。缺乏可靠证据支持审减，故保留原值。",
+                        "status": "completed",
+                        "result_type": "unchanged",
+                        "error_message": "",
+                        "reviewed_amount": "21150.0000",
+                        "reduction_amount": "0.0000"
+                    },
+                    "fee_type": "普通展台-现场搭建及拆除人工",
+                    "row_type": "leaf",
+                    "sequence_no": "3.7",
+                    "excel_row_no": 25,
+                    "submitted_amount": "21150.0000",
+                    "parent_sequence_no": "3"
+                },
+                {
+                    "row_id": 153,
+                    "decision": {
+                        "reason": "该费用为普通展台本地运输费，包含从天津本地制作工厂到梅江会展中心的往返运输及装卸费，按项目打包核算。经查询，缺乏可靠的市场价格依据。考虑到临时展会项目的实际需求及天津地区小型货车运输服务的市场行情，送审单价210元/项基本合理，建议保持原值。",
+                        "status": "completed",
+                        "result_type": "unchanged",
+                        "error_message": "",
+                        "reviewed_amount": "9870.0000",
+                        "reduction_amount": "0.0000"
+                    },
+                    "fee_type": "普通展台-本地运输费",
+                    "row_type": "leaf",
+                    "sequence_no": "3.8",
+                    "excel_row_no": 26,
+                    "submitted_amount": "9870.0000",
+                    "parent_sequence_no": "3"
+                },
+                {
+                    "row_id": 154,
+                    "decision": {
+                        "reason": "缺乏直接可比的防火地毯市场价格依据。送审单价22元/㎡在展会地面保护材料合理范围内，且符合国展会务对地面保护的要求，故保持原值。",
+                        "status": "completed",
+                        "result_type": "unchanged",
+                        "error_message": "",
+                        "reviewed_amount": "42350.0000",
+                        "reduction_amount": "0.0000"
+                    },
+                    "fee_type": "防火地毯",
+                    "row_type": "leaf",
+                    "sequence_no": "4",
+                    "excel_row_no": 27,
+                    "submitted_amount": "42350.0000",
+                    "parent_sequence_no": ""
+                },
+                {
+                    "row_id": 155,
+                    "decision": {
+                        "reason": "电费为天津梅江会展中心临时展会项目用电费用，包括照明、LED显示、设备等用电。经查询标准价格库，未找到电费相关参考价格。电费通常需根据实际用电量、电价和用电时间计算，送审行仅提供总金额，缺乏单价、数量等详细信息，无法进行准确价格比对。在缺乏可靠市场价格依据的情况下，保持送审值不变。",
+                        "status": "completed",
+                        "result_type": "unchanged",
+                        "error_message": "",
+                        "reviewed_amount": "5000.0000",
+                        "reduction_amount": "0.0000"
+                    },
+                    "fee_type": "电费",
+                    "row_type": "leaf",
+                    "sequence_no": "5",
+                    "excel_row_no": 28,
+                    "submitted_amount": "5000.0000",
+                    "parent_sequence_no": ""
+                },
+                {
+                    "row_id": 156,
+                    "decision": {
+                        "reason": "设计费属于专业服务费用，根据项目需求（整体展位内容设计）确定。在标准价格库中未找到相关参考价格，且5000元的设计费在临时展会项目中属于合理范围，故保持送审值不变。",
+                        "status": "completed",
+                        "result_type": "unchanged",
+                        "error_message": "",
+                        "reviewed_amount": "5000.0000",
+                        "reduction_amount": "0.0000"
+                    },
+                    "fee_type": "设计费",
+                    "row_type": "leaf",
+                    "sequence_no": "6",
+                    "excel_row_no": 29,
+                    "submitted_amount": "5000.0000",
+                    "parent_sequence_no": ""
+                },
+                {
+                    "row_id": 157,
+                    "decision": {
+                        "reason": "由子项审核结果自动汇总生成。",
+                        "status": "completed",
+                        "result_type": "aggregated",
+                        "error_message": "",
+                        "reviewed_amount": "10000.0000",
+                        "reduction_amount": "0.0000"
+                    },
+                    "fee_type": "交通费",
+                    "row_type": "group",
+                    "sequence_no": "7",
+                    "excel_row_no": 30,
+                    "submitted_amount": "10000.0000",
+                    "parent_sequence_no": ""
+                },
+                {
+                    "row_id": 158,
+                    "decision": {
+                        "reason": "送审金额7000元，27人，平均每人259.26元，用于北京和石家庄两地往返天津高铁票。经查询标准价格库，未找到高铁票相关参考价格。根据预算说明，该费用为外省市劳务品牌参展人员交通费，结合临时展会项目性质及天津梅江会展中心地理位置，送审金额处于合理范围。缺乏可靠市场价格依据，保持原值不变。",
+                        "status": "completed",
+                        "result_type": "unchanged",
+                        "error_message": "",
+                        "reviewed_amount": "7000.0000",
+                        "reduction_amount": "0.0000"
+                    },
+                    "fee_type": "交通费-外省市劳务品牌高铁费",
+                    "row_type": "leaf",
+                    "sequence_no": "7.1",
+                    "excel_row_no": 31,
+                    "submitted_amount": "7000.0000",
+                    "parent_sequence_no": "7"
+                },
+                {
+                    "row_id": 159,
+                    "decision": {
+                        "reason": "经查询标准价库，未找到大巴车租赁相关价格依据。送审价格1500元/辆/天在天津地区大巴车租赁市场合理范围内，且用途为参展劳务品牌代表接送机及会展中心往返，符合临时展会项目需求，故维持原值。",
+                        "status": "completed",
+                        "result_type": "unchanged",
+                        "error_message": "",
+                        "reviewed_amount": "3000.0000",
+                        "reduction_amount": "0.0000"
+                    },
+                    "fee_type": "交通费-市内交通费",
+                    "row_type": "leaf",
+                    "sequence_no": "7.2",
+                    "excel_row_no": 32,
+                    "submitted_amount": "3000.0000",
+                    "parent_sequence_no": "7"
+                },
+                {
+                    "row_id": 160,
+                    "decision": {
+                        "reason": "送审单价30元/人次参照《天津市党政机关差旅费管理办法》伙食补助费标准，在标准价格库中未查询到相关餐费标准，且该单价在差旅伙食补助费中属于合理范围，故保持原值不变。",
+                        "status": "completed",
+                        "result_type": "unchanged",
+                        "error_message": "",
+                        "reviewed_amount": "13860.0000",
+                        "reduction_amount": "0.0000"
+                    },
+                    "fee_type": "餐费",
+                    "row_type": "leaf",
+                    "sequence_no": "8",
+                    "excel_row_no": 33,
+                    "submitted_amount": "13860.0000",
+                    "parent_sequence_no": ""
+                },
+                {
+                    "row_id": 161,
+                    "decision": {
+                        "reason": "送审价格参照《天津市党政机关差旅费管理办法》天津市党政机关差旅住宿费限额标准350元/人/天执行，符合政府规定标准。经查询标准价格库，未找到住宿费相关市场价格依据，缺乏可靠证据进行审减，故保持原值。",
+                        "status": "completed",
+                        "result_type": "unchanged",
+                        "error_message": "",
+                        "reviewed_amount": "12250.0000",
+                        "reduction_amount": "0.0000"
+                    },
+                    "fee_type": "住宿费",
+                    "row_type": "leaf",
+                    "sequence_no": "9",
+                    "excel_row_no": 34,
+                    "submitted_amount": "12250.0000",
+                    "parent_sequence_no": ""
+                },
+                {
+                    "row_id": 162,
+                    "decision": {
+                        "reason": "缺乏可靠的市场价格依据。该项目为天津梅江会展中心临时展会活动宣传视频制作，包含专业摄影师2人、摄像师2人、创意策划、摄像设备租赁、后期视频剪辑制作等全套服务，制作时长不少于2分钟。送审价格24,000元为综合服务费用，在缺乏明确市场参考价的情况下，建议保持原值。",
+                        "status": "completed",
+                        "result_type": "unchanged",
+                        "error_message": "",
+                        "reviewed_amount": "24000.0000",
+                        "reduction_amount": "0.0000"
+                    },
+                    "fee_type": "视频拍摄及制作",
+                    "row_type": "leaf",
+                    "sequence_no": "10",
+                    "excel_row_no": 35,
+                    "submitted_amount": "24000.0000",
+                    "parent_sequence_no": ""
+                },
+                {
+                    "row_id": 163,
+                    "decision": {
+                        "reason": "由子项审核结果自动汇总生成。",
+                        "status": "completed",
+                        "result_type": "aggregated",
+                        "error_message": "",
+                        "reviewed_amount": "8800.0000",
+                        "reduction_amount": "0.0000"
+                    },
+                    "fee_type": "活动现场工作人员劳务费",
+                    "row_type": "group",
+                    "sequence_no": "11",
+                    "excel_row_no": 36,
+                    "submitted_amount": "8800.0000",
+                    "parent_sequence_no": ""
+                },
+                {
+                    "row_id": 164,
+                    "decision": {
+                        "reason": "经查询标准价数据库，未找到会展场务人员劳务费相关标准价格。考虑到天津梅江会展中心临时展会项目性质，场务人员负责活动现场及流程衔接的后勤保障与执行支持，工作强度较大，且缺乏可靠市场价格依据，故保持送审值不变。",
+                        "status": "completed",
+                        "result_type": "unchanged",
+                        "error_message": "",
+                        "reviewed_amount": "6400.0000",
+                        "reduction_amount": "0.0000"
+                    },
+                    "fee_type": "活动现场工作人员劳务费-场务人员",
+                    "row_type": "leaf",
+                    "sequence_no": "11.1",
+                    "excel_row_no": 37,
+                    "submitted_amount": "6400.0000",
+                    "parent_sequence_no": "11"
+                },
+                {
+                    "row_id": 165,
+                    "decision": {
+                        "reason": "经查询标准价格库，未找到展会场内引导员劳务费相关标准。考虑到天津梅江会展中心临时展会项目性质，场内引导员需负责现场指引、咨询解答、秩序维护等工作，600元/人/天的价格在会展行业临时工作人员劳务费中属于合理范围。因缺乏可靠市场价格依据，保持送审值不变。",
+                        "status": "completed",
+                        "result_type": "unchanged",
+                        "error_message": "",
+                        "reviewed_amount": "2400.0000",
+                        "reduction_amount": "0.0000"
+                    },
+                    "fee_type": "活动现场工作人员劳务费-场内引导员",
+                    "row_type": "leaf",
+                    "sequence_no": "11.2",
+                    "excel_row_no": 38,
+                    "submitted_amount": "2400.0000",
+                    "parent_sequence_no": "11"
+                },
+                {
+                    "row_id": 166,
+                    "decision": {
+                        "reason": "由子项审核结果自动汇总生成。",
+                        "status": "completed",
+                        "result_type": "aggregated",
+                        "error_message": "",
+                        "reviewed_amount": "3485.0000",
+                        "reduction_amount": "0.0000"
+                    },
+                    "fee_type": "其他耗材",
+                    "row_type": "group",
+                    "sequence_no": "12",
+                    "excel_row_no": 39,
+                    "submitted_amount": "3485.0000",
+                    "parent_sequence_no": ""
+                },
+                {
+                    "row_id": 167,
+                    "decision": {
+                        "reason": "送审单价36元/箱的24瓶装纯净水在合理市场价格范围内，且为临时展会参会人员必要饮用水。经查询标准价数据库，未找到纯净水相关价格依据，缺乏可靠证据进行审减，故保持原值不变。",
+                        "status": "completed",
+                        "result_type": "unchanged",
+                        "error_message": "",
+                        "reviewed_amount": "720.0000",
+                        "reduction_amount": "0.0000"
+                    },
+                    "fee_type": "其他耗材-活动用水",
+                    "row_type": "leaf",
+                    "sequence_no": "12.1",
+                    "excel_row_no": 40,
+                    "submitted_amount": "720.0000",
+                    "parent_sequence_no": "12"
+                },
+                {
+                    "row_id": 168,
+                    "decision": {
+                        "reason": "缺乏参会证（PVC硬卡定制+挂绳定制）的可靠市场价格依据。送审单价4.5元/个在合理范围内，数量170个符合临时展会参会人员使用需求，建议保留原值。",
+                        "status": "completed",
+                        "result_type": "unchanged",
+                        "error_message": "",
+                        "reviewed_amount": "765.0000",
+                        "reduction_amount": "0.0000"
+                    },
+                    "fee_type": "其他耗材-参会证",
+                    "row_type": "leaf",
+                    "sequence_no": "12.2",
+                    "excel_row_no": 41,
+                    "submitted_amount": "765.0000",
+                    "parent_sequence_no": "12"
+                },
+                {
+                    "row_id": 169,
+                    "decision": {
+                        "reason": "缺乏可靠的市场价格依据。送审金额2000元用于2000平米展会场地公众责任险，考虑到天津梅江会展中心临时展会的性质，该费用在合理范围内。",
+                        "status": "completed",
+                        "result_type": "adjusted",
+                        "error_message": "",
+                        "reviewed_amount": "2000.0000",
+                        "reduction_amount": "0.0000"
+                    },
+                    "fee_type": "其他耗材-保险费",
+                    "row_type": "leaf",
+                    "sequence_no": "12.3",
+                    "excel_row_no": 42,
+                    "submitted_amount": "2000.0000",
+                    "parent_sequence_no": "12"
+                },
+                {
+                    "row_id": 170,
+                    "decision": {
+                        "reason": "由顶层费用项自动汇总生成。",
+                        "status": "completed",
+                        "result_type": "aggregated",
+                        "error_message": "",
+                        "reviewed_amount": "561660.0000",
+                        "reduction_amount": "0.0000"
+                    },
+                    "fee_type": "小计",
+                    "row_type": "summary",
+                    "sequence_no": "",
+                    "excel_row_no": 43,
+                    "submitted_amount": "561660.0000",
+                    "parent_sequence_no": ""
+                },
+                {
+                    "row_id": 171,
+                    "decision": {
+                        "reason": "税费当前版本不做智能审核，暂按送审金额保留。",
+                        "status": "completed",
+                        "result_type": "skipped",
+                        "error_message": "",
+                        "reviewed_amount": "37743.5520",
+                        "reduction_amount": "0.0000"
+                    },
+                    "fee_type": "税费",
+                    "row_type": "summary",
+                    "sequence_no": "",
+                    "excel_row_no": 44,
+                    "submitted_amount": "37743.5520",
+                    "parent_sequence_no": ""
+                },
+                {
+                    "row_id": 172,
+                    "decision": {
+                        "reason": "由小计和税费自动汇总生成。",
+                        "status": "completed",
+                        "result_type": "aggregated",
+                        "error_message": "",
+                        "reviewed_amount": "599403.5520",
+                        "reduction_amount": "0.0000"
+                    },
+                    "fee_type": "合计",
+                    "row_type": "summary",
+                    "sequence_no": "",
+                    "excel_row_no": 45,
+                    "submitted_amount": "599403.5520",
+                    "parent_sequence_no": ""
+                }
+            ],
+            "status": "processing",
+            "statistics": {
+                "total_rows": 43,
+                "failed_rows": 0,
+                "skipped_rows": 1,
+                "completed_rows": 43
+            },
+            "project_name": "评审表样例",
+            "submission_id": 7,
+            "price_batch_id": 1,
+            "reviewed_total_amount": "599403.5520",
+            "reduction_total_amount": "0.0000",
+            "submitted_total_amount": "599403.5520"
+        },
+        "error_message": "",
+        "created_at": "2026-03-14T18:56:16.314813+08:00",
+        "updated_at": "2026-03-14T19:19:18.504954+08:00",
+        "detail_url": "http://gvmt.dagimed.com/api/v1/price-audit/submissions/7/",
+        "rows_url": "http://gvmt.dagimed.com/api/v1/price-audit/submissions/7/rows/",
+        "audited_excel_download_url": "http://gvmt.dagimed.com/api/v1/price-audit/submissions/7/download/audited-excel/"
+    }
+}
