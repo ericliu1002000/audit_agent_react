@@ -110,7 +110,19 @@ const resolveRowsData = (data: any): any[] => {
 }
 
 const mapResultTypeToStatus = (rawRow: Record<string, unknown>): AmountStatus => {
-  const decision = (rawRow.decision as Record<string, unknown> | undefined) || {}
+  const rowType = String(rawRow.row_type || "").toLowerCase()
+  const rawDecision = rawRow.decision
+  const hasDecision =
+    typeof rawDecision === "object" &&
+    rawDecision !== null &&
+    !Array.isArray(rawDecision) &&
+    Object.keys(rawDecision as Record<string, unknown>).length > 0
+
+  if (!hasDecision) {
+    return rowType === "summary" ? "normal" : "pending"
+  }
+
+  const decision = rawDecision as Record<string, unknown>
   const resultType = String(decision.result_type || "").toLowerCase()
   const decisionStatus = String(decision.status || "").toLowerCase()
   const dangerKeywords = ["failed", "error", "abnormal", "exception"]
@@ -204,7 +216,7 @@ const mapRowsAndIssues = (rowsPayload: any[]) => {
   })
 
   const issues: AuditIssue[] = mappedRowsWithMeta
-    .filter((item) => item.row.status !== "normal")
+    .filter((item) => item.row.status === "danger" || item.row.status === "warning")
     .sort((a, b) => getStatusPriority(a.row.status) - getStatusPriority(b.row.status) || a.order - b.order)
     .map((item) => {
       const level = item.row.status === "danger" ? "异常" : "警告"
@@ -643,6 +655,16 @@ const AuditAnalysisPage = () => {
         </span>
       )
     }
+    if (status === "pending") {
+      return (
+        <span className="inline-flex items-center gap-2">
+          <span className="audit-dot audit-dot-pending" />
+          <Tag className="!m-0" color="processing">
+            等待AI评审中
+          </Tag>
+        </span>
+      )
+    }
     return (
       <span className="inline-flex items-center gap-2">
         <span className="audit-dot audit-dot-normal" />
@@ -757,9 +779,10 @@ const AuditAnalysisPage = () => {
       title: "序号",
       dataIndex: "index",
       width: 78,
+      align: "center",
       render: (value: number) => (Number.isFinite(value) && value !== 0 ? value : ""),
     },
-    { title: "项目名称", dataIndex: "item", ellipsis: true },
+    { title: "项目名称", dataIndex: "item", width: 180, ellipsis: true },
     {
       title: "申报金额",
       dataIndex: "declared",
@@ -770,7 +793,7 @@ const AuditAnalysisPage = () => {
       title: "AI审核价",
       dataIndex: "ai",
       width: 130,
-      render: (value: number) => <span className="font-mono text-slate-500">{formatCurrency(value)}</span>,
+      render: (value: number) => <span className="font-mono audit-ai-amount">{formatCurrency(value)}</span>,
     },
     {
       title: "状态",

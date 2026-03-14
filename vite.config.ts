@@ -5,6 +5,7 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "")
   const apiTarget = env.VITE_API_BASE_URL.replace(/\/api\/?$/, "")
   const targetOrigin = new URL(apiTarget).origin
+  const isProduction = mode === "production"
 
   return {
     plugins: [react()],
@@ -24,6 +25,16 @@ export default defineConfig(({ mode }) => {
       },
     },
     build: {
+      emptyOutDir: true,
+      minify: isProduction ? "terser" : "esbuild",
+      terserOptions: isProduction
+        ? {
+            compress: {
+              drop_console: true,
+              drop_debugger: true,
+            },
+          }
+        : undefined,
       chunkSizeWarningLimit: 900,
       rollupOptions: {
         output: {

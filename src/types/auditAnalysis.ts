@@ -1,4 +1,4 @@
-export type AmountStatus = "normal" | "warning" | "danger"
+export type AmountStatus = "normal" | "warning" | "danger" | "pending"
 
 export type AuditDetailRow = {
   key: string
