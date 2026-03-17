@@ -14,7 +14,7 @@ import { Button, Card, Empty, List, Modal, Progress, Statistic, Steps, Table, Ta
 import type { ColumnsType } from "antd/es/table"
 import { useLocation, useNavigate } from "react-router-dom"
 import client from "../api/client"
-import type { AmountStatus, AuditDetailRow, AuditIssue, AuditRow } from "../types/auditAnalysis"
+import type { AmountStatus, AuditDetailRow, AuditEvidenceItem, AuditIssue, AuditRow } from "../types/auditAnalysis"
 import type {
   PriceAuditSubmissionData,
   PriceAuditSubmissionDetailResponse,
@@ -36,6 +36,8 @@ type AnalysisEvent = {
   message: string
   createdAt: number
 }
+
+const MIN_PROCESSING_VIEW_MS = 1500
 
 type ApiError = {
   response?: {
@@ -93,7 +95,70 @@ const toNumber = (value: unknown) => {
 
 const toText = (value: unknown) => (typeof value === "string" ? value.trim() : "")
 
-const resolveRowsData = (data: any): any[] => {
+const hasUsableValue = (value: unknown) => {
+  if (typeof value === "number") {
+    return Number.isFinite(value)
+  }
+  if (typeof value === "string") {
+    return value.trim() !== ""
+  }
+  return value !== undefined && value !== null
+}
+
+const toDisplayText = (value: unknown) => {
+  if (typeof value === "number") {
+    return Number.isFinite(value) ? String(value) : "-"
+  }
+  if (typeof value === "string") {
+    const normalized = value.trim()
+    return normalized || "-"
+  }
+  return "-"
+}
+
+const easeOutCubic = (progress: number) => 1 - (1 - progress) ** 3
+
+const useAnimatedNumber = (target: number, duration = 650) => {
+  const normalizedTarget = Number.isFinite(target) ? target : 0
+  const [animatedValue, setAnimatedValue] = useState(normalizedTarget)
+  const currentValueRef = useRef(normalizedTarget)
+
+  useEffect(() => {
+    const startValue = currentValueRef.current
+    const delta = normalizedTarget - startValue
+    if (Math.abs(delta) < 0.0001) {
+      currentValueRef.current = normalizedTarget
+      return
+    }
+
+    const startAt = performance.now()
+    let rafId: number | null = null
+
+    const tick = (now: number) => {
+      const progress = Math.min((now - startAt) / duration, 1)
+      const nextValue = startValue + delta * easeOutCubic(progress)
+      currentValueRef.current = nextValue
+      setAnimatedValue(nextValue)
+      if (progress < 1) {
+        rafId = window.requestAnimationFrame(tick)
+        return
+      }
+      currentValueRef.current = normalizedTarget
+      setAnimatedValue(normalizedTarget)
+    }
+
+    rafId = window.requestAnimationFrame(tick)
+    return () => {
+      if (rafId !== null) {
+        window.cancelAnimationFrame(rafId)
+      }
+    }
+  }, [duration, normalizedTarget])
+
+  return animatedValue
+}
+
+const resolveRowsData = (data: unknown): unknown[] => {
   if (Array.isArray(data)) return data
   if (!data || typeof data !== "object") return []
 
@@ -142,18 +207,21 @@ const getStatusPriority = (status: AmountStatus) => {
   return 2
 }
 
-const mapRowsAndIssues = (rowsPayload: any[]) => {
+const mapRowsAndIssues = (rowsPayload: unknown[]) => {
   const mappedRowsWithMeta = rowsPayload.map((rawRow, index) => {
     const rowRecord = (rawRow || {}) as Record<string, unknown>
-    const decision = (rowRecord.decision as Record<string, unknown> | undefined) || {}
+    const decisionRaw = rowRecord.decision
+    const decision =
+      typeof decisionRaw === "object" && decisionRaw !== null && !Array.isArray(decisionRaw)
+        ? (decisionRaw as Record<string, unknown>)
+        : {}
     const sequenceNoText = toText(rowRecord.sequence_no)
+    const rowType = String(rowRecord.row_type || "").toLowerCase()
     const submittedAmount = toNumber(rowRecord.submitted_amount)
-    const reductionAmount = toNumber(decision.reduction_amount)
-    const hasReviewedAmount =
-      decision.reviewed_amount !== undefined && decision.reviewed_amount !== null && decision.reviewed_amount !== ""
-    const reviewedAmount = hasReviewedAmount
-      ? toNumber(decision.reviewed_amount)
-      : Math.max(submittedAmount - reductionAmount, 0)
+    const hasReviewedAmount = hasUsableValue(decision.reviewed_amount)
+    const reviewedAmount = hasReviewedAmount ? toNumber(decision.reviewed_amount) : null
+    const reductionAmount =
+      reviewedAmount === null ? 0 : Math.max(toNumber(decision.reduction_amount), submittedAmount - reviewedAmount, 0)
     const status = mapResultTypeToStatus(rowRecord)
 
     const submittedUnit = toText(rowRecord.submitted_unit) || toText(rowRecord.unit) || "-"
@@ -175,13 +243,28 @@ const mapRowsAndIssues = (rowsPayload: any[]) => {
       reviewedDaysSource === undefined || reviewedDaysSource === null ? submittedDays : toNumber(reviewedDaysSource)
     const reviewedPriceRaw = toNumber(decision.reviewed_unit_price ?? rowRecord.reviewed_unit_price)
     const reviewedDivisor = reviewedQuantity > 0 ? reviewedQuantity * Math.max(reviewedDays, 1) : 0
+    const reviewedAmountForDetail = reviewedAmount ?? 0
     const reviewedUnitPrice =
-      reviewedPriceRaw > 0 ? reviewedPriceRaw : reviewedDivisor > 0 ? reviewedAmount / reviewedDivisor : 0
+      reviewedPriceRaw > 0 ? reviewedPriceRaw : reviewedDivisor > 0 ? reviewedAmountForDetail / reviewedDivisor : 0
 
-    const parsedRowId = Math.trunc(toNumber(rowRecord.row_id))
+    const parsedRowId = Math.trunc(toNumber(rowRecord.row_id ?? rowRecord.id))
     const rowKey = parsedRowId > 0 ? parsedRowId : index + 1
     const itemName = toText(rowRecord.fee_type) || `第${index + 1}项`
     const reasonText = toText(decision.reason) || toText(decision.error_message)
+    const evidenceJson =
+      typeof decision.evidence_json === "object" && decision.evidence_json !== null
+        ? (decision.evidence_json as Record<string, unknown>)
+        : null
+    const candidates = Array.isArray(evidenceJson?.candidates) ? evidenceJson.candidates : []
+    const auditEvidence: AuditEvidenceItem[] = candidates.map((candidate) => {
+      const evidence = (candidate || {}) as Record<string, unknown>
+      return {
+        name: toText(evidence.material_name) || toText(evidence.name) || "-",
+        unit: toText(evidence.unit) || "-",
+        max: toDisplayText(evidence.price_max),
+        min: toDisplayText(evidence.price_min),
+      }
+    })
 
     const mappedRow: AuditRow = {
       key: rowKey,
@@ -190,6 +273,9 @@ const mapRowsAndIssues = (rowsPayload: any[]) => {
       declared: submittedAmount,
       ai: reviewedAmount,
       status,
+      rowType,
+      auditReason: reasonText,
+      auditEvidence,
       details: [
         {
           key: `${rowKey}-detail`,
@@ -202,7 +288,7 @@ const mapRowsAndIssues = (rowsPayload: any[]) => {
           reviewedUnitPrice,
           reviewedQuantity,
           reviewedDays,
-          reviewedAmount,
+          reviewedAmount: reviewedAmountForDetail,
           reductionAmount,
         },
       ],
@@ -220,7 +306,7 @@ const mapRowsAndIssues = (rowsPayload: any[]) => {
     .sort((a, b) => getStatusPriority(a.row.status) - getStatusPriority(b.row.status) || a.order - b.order)
     .map((item) => {
       const level = item.row.status === "danger" ? "异常" : "警告"
-      const suggestion = Math.max(item.row.declared - item.row.ai, 0)
+      const suggestion = item.row.ai === null ? 0 : Math.max(item.row.declared - item.row.ai, 0)
       return {
         key: item.row.key,
         title: level === "异常" ? `${item.row.item}存在异常` : `${item.row.item}建议复核`,
@@ -252,6 +338,7 @@ const AuditAnalysisPage = () => {
   const [tableScrollY, setTableScrollY] = useState(480)
   const [submissionDetail, setSubmissionDetail] = useState<PriceAuditSubmissionData | null>(null)
   const [expandedRowKey, setExpandedRowKey] = useState<number | null>(null)
+  const [expandedEvidenceRowKey, setExpandedEvidenceRowKey] = useState<number | null>(null)
   const [tableRows, setTableRows] = useState<AuditRow[]>([])
   const [issues, setIssues] = useState<AuditIssue[]>([])
   const [rowsLoading, setRowsLoading] = useState(false)
@@ -263,22 +350,27 @@ const AuditAnalysisPage = () => {
   const pollingTimer = useRef<number | null>(null)
   const firstFetchKickoffTimer = useRef<number | null>(null)
   const firstErrorNavigateTimer = useRef<number | null>(null)
+  const resultRevealTimerRef = useRef<number | null>(null)
+  const processingViewStartAtRef = useRef(0)
   const prevProcessedRowsRef = useRef(0)
   const rowsSyncedProcessedRowsRef = useRef(0)
-  const lastSyncedNoticeProcessedRowsRef = useRef(0)
-  const analysisStartedRef = useRef(false)
-  const analysisCompletedRef = useRef(false)
   const rowsFetchingRef = useRef(false)
   const pendingRowsFetchRef = useRef<{ processedRows: number; totalRows: number; force: boolean } | null>(null)
   const resultStateRef = useRef<HTMLDivElement | null>(null)
   const resultTopRef = useRef<HTMLDivElement | null>(null)
   const thinkingPanelRef = useRef<HTMLDivElement | null>(null)
+  const thinkingListRef = useRef<HTMLDivElement | null>(null)
 
   const appendAnalysisEvent = (eventMessage: string) => {
+    const normalizedMessage = eventMessage.trim()
+    if (!normalizedMessage) return
     setAnalysisEvents((prev) => {
+      if (prev.length > 0 && prev[prev.length - 1].message === normalizedMessage) {
+        return prev
+      }
       const nextEvent: AnalysisEvent = {
         id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
-        message: eventMessage,
+        message: normalizedMessage,
         createdAt: Date.now(),
       }
       return [...prev, nextEvent].slice(-50)
@@ -286,16 +378,21 @@ const AuditAnalysisPage = () => {
   }
 
   const totals = useMemo(() => {
-    const declared = toNumber(submissionDetail?.submitted_total_amount)
-    const ai = toNumber(submissionDetail?.reviewed_total_amount)
-    const reduction = toNumber(submissionDetail?.reduction_total_amount)
+    const leafRows = tableRows.filter((row) => row.rowType === "leaf")
+    const declared = leafRows.reduce((sum, row) => sum + row.declared, 0)
+    const reviewedRows = leafRows.filter((row) => row.ai !== null)
+    const ai = reviewedRows.reduce((sum, row) => sum + (row.ai ?? 0), 0)
+    const reduction = reviewedRows.reduce((sum, row) => sum + Math.max(row.declared - (row.ai ?? 0), 0), 0)
     return {
       declared,
       ai,
       reduction,
       ratio: declared > 0 ? Math.round((reduction / declared) * 100) : 0,
     }
-  }, [submissionDetail])
+  }, [tableRows])
+  const animatedDeclaredTotal = useAnimatedNumber(totals.declared)
+  const animatedAiTotal = useAnimatedNumber(totals.ai)
+  const animatedReductionTotal = useAnimatedNumber(totals.reduction)
 
   const projectMeta = useMemo(
     () => ({
@@ -351,14 +448,39 @@ const AuditAnalysisPage = () => {
       window.clearTimeout(firstErrorNavigateTimer.current)
       firstErrorNavigateTimer.current = null
     }
+    const clearResultRevealTimer = () => {
+      if (!resultRevealTimerRef.current) return
+      window.clearTimeout(resultRevealTimerRef.current)
+      resultRevealTimerRef.current = null
+    }
+    const revealResultWithMinDuration = () => {
+      if (!firstFetchRef.current) {
+        clearResultRevealTimer()
+        setViewState("result")
+        return
+      }
+      const elapsed = Date.now() - processingViewStartAtRef.current
+      const remaining = Math.max(0, MIN_PROCESSING_VIEW_MS - elapsed)
+      if (remaining <= 0) {
+        clearResultRevealTimer()
+        setViewState("result")
+        return
+      }
+      if (resultRevealTimerRef.current) {
+        return
+      }
+      resultRevealTimerRef.current = window.setTimeout(() => {
+        resultRevealTimerRef.current = null
+        setViewState("result")
+      }, remaining)
+    }
     const resetRealtimeState = () => {
       firstFetchRef.current = true
       firstErrorHandledRef.current = false
+      processingViewStartAtRef.current = Date.now()
+      clearResultRevealTimer()
       prevProcessedRowsRef.current = 0
       rowsSyncedProcessedRowsRef.current = 0
-      lastSyncedNoticeProcessedRowsRef.current = 0
-      analysisStartedRef.current = false
-      analysisCompletedRef.current = false
       rowsFetchingRef.current = false
       pendingRowsFetchRef.current = null
       setViewState("processing")
@@ -366,6 +488,7 @@ const AuditAnalysisPage = () => {
       setActiveStep(0)
       setSubmissionDetail(null)
       setExpandedRowKey(null)
+      setExpandedEvidenceRowKey(null)
       setTableRows([])
       setIssues([])
       setRowsLoading(false)
@@ -375,6 +498,7 @@ const AuditAnalysisPage = () => {
     const handleFirstQueryFatalError = (errorText?: string) => {
       if (!firstFetchRef.current || firstErrorHandledRef.current) return
       firstErrorHandledRef.current = true
+      clearResultRevealTimer()
       clearPollingTimer()
       const modal = Modal.error({
         title: "送审单查询失败",
@@ -396,6 +520,7 @@ const AuditAnalysisPage = () => {
         clearFirstFetchKickoffTimer()
         clearPollingTimer()
         clearNavigateTimer()
+        clearResultRevealTimer()
       }
     }
 
@@ -433,12 +558,6 @@ const AuditAnalysisPage = () => {
         setTableRows(mapped.rows)
         setIssues(mapped.issues)
         rowsSyncedProcessedRowsRef.current = Math.max(rowsSyncedProcessedRowsRef.current, currentProcessedRows)
-
-        if (currentProcessedRows > lastSyncedNoticeProcessedRowsRef.current) {
-          const syncedRows = Math.min(currentProcessedRows, totalRows > 0 ? totalRows : currentProcessedRows)
-          appendAnalysisEvent(`已同步前 ${syncedRows} 条分析结果`)
-          lastSyncedNoticeProcessedRowsRef.current = currentProcessedRows
-        }
       } catch (e) {
         const err = e as ApiError
         message.error(err.response?.data?.error?.message || err.response?.data?.message || "获取送审行数据失败")
@@ -477,31 +596,14 @@ const AuditAnalysisPage = () => {
         setProgress(Math.max(0, Math.min(100, Number(detail.progress_percent || 0))))
         setActiveStep(mapCurrentStepToIndex(detail.current_step || "queued"))
         if (firstFetchRef.current) {
-          setViewState("result")
+          revealResultWithMinDuration()
         }
 
         const totalRows = Math.max(0, Math.trunc(toNumber(detail.total_rows)))
         const processedRows = Math.max(0, Math.trunc(toNumber(detail.processed_rows)))
+        appendAnalysisEvent(toText(detail.current_message))
 
-        if (!analysisStartedRef.current && totalRows > 0) {
-          appendAnalysisEvent(`开始分析，共 ${totalRows} 条`)
-          analysisStartedRef.current = true
-        }
-
-        if (processedRows > prevProcessedRowsRef.current) {
-          const previousProcessedRows = prevProcessedRowsRef.current
-          const nextMessage =
-            processedRows - previousProcessedRows > 1
-              ? `已完成第 ${previousProcessedRows + 1}-${processedRows} 条，${
-                  processedRows < totalRows ? `正在分析第 ${processedRows + 1} 条` : "正在生成最终报告"
-                }`
-              : `已完成第 ${processedRows} 条，${
-                  processedRows < totalRows ? `正在分析第 ${processedRows + 1} 条` : "正在生成最终报告"
-                }`
-          appendAnalysisEvent(nextMessage)
-          prevProcessedRowsRef.current = processedRows
-          setPrevProcessedRows(processedRows)
-        } else if (processedRows !== prevProcessedRowsRef.current) {
+        if (processedRows !== prevProcessedRowsRef.current) {
           prevProcessedRowsRef.current = processedRows
           setPrevProcessedRows(processedRows)
         }
@@ -512,12 +614,8 @@ const AuditAnalysisPage = () => {
 
         const status = (detail.status || "").toLowerCase()
         if (status === "completed") {
-          setViewState("result")
+          revealResultWithMinDuration()
           clearPollingTimer()
-          if (!analysisCompletedRef.current) {
-            appendAnalysisEvent("全部数据分析完成")
-            analysisCompletedRef.current = true
-          }
           await fetchSubmissionRows(processedRows, totalRows, true)
           return false
         }
@@ -558,7 +656,7 @@ const AuditAnalysisPage = () => {
         if (!shouldStartPolling || firstErrorHandledRef.current) return
         pollingTimer.current = window.setInterval(() => {
           void fetchSubmissionDetail()
-        }, 3000)
+        }, 6000)
       })()
     }, 0)
 
@@ -566,6 +664,7 @@ const AuditAnalysisPage = () => {
       clearFirstFetchKickoffTimer()
       clearPollingTimer()
       clearNavigateTimer()
+      clearResultRevealTimer()
     }
   }, [navigate, submissionId])
 
@@ -633,6 +732,18 @@ const AuditAnalysisPage = () => {
       resizeObserver.disconnect()
     }
   }, [analysisEvents.length, showAnalysisTimeline, viewState])
+
+  useEffect(() => {
+    if (!showAnalysisTimeline) return
+    const rafId = window.requestAnimationFrame(() => {
+      const thinkingListEl = thinkingListRef.current
+      if (!thinkingListEl) return
+      thinkingListEl.scrollTop = thinkingListEl.scrollHeight
+    })
+    return () => {
+      window.cancelAnimationFrame(rafId)
+    }
+  }, [analysisEvents.length, showAnalysisTimeline])
 
   const statusTag = (status: AmountStatus) => {
     if (status === "danger") {
@@ -774,6 +885,33 @@ const AuditAnalysisPage = () => {
     },
   ]
 
+  const evidenceColumns: ColumnsType<AuditEvidenceItem> = [
+    {
+      title: "名称",
+      dataIndex: "name",
+      width: 180,
+      ellipsis: true,
+    },
+    {
+      title: "单位",
+      dataIndex: "unit",
+      width: 100,
+      align: "center",
+    },
+    {
+      title: "最大价格值",
+      dataIndex: "max",
+      width: 120,
+      align: "center",
+    },
+    {
+      title: "最小价格值",
+      dataIndex: "min",
+      width: 120,
+      align: "center",
+    },
+  ]
+
   const columns: ColumnsType<AuditRow> = [
     {
       title: "序号",
@@ -787,13 +925,14 @@ const AuditAnalysisPage = () => {
       title: "申报金额",
       dataIndex: "declared",
       width: 130,
-      render: (value: number) => <span className="font-mono">{formatCurrency(value)}</span>,
+      render: (value: number) => <span className="font-mono font-bold">{formatCurrency(value)}</span>,
     },
     {
       title: "AI审核价",
       dataIndex: "ai",
       width: 130,
-      render: (value: number) => <span className="font-mono audit-ai-amount">{formatCurrency(value)}</span>,
+      render: (value: number | null) =>
+        value === null ? <span className="audit-ai-amount-empty">--</span> : <span className="font-mono audit-ai-amount font-bold">{formatCurrency(value)}</span>,
     },
     {
       title: "状态",
@@ -811,7 +950,9 @@ const AuditAnalysisPage = () => {
             type="link"
             className="audit-detail-trigger"
             onClick={() => {
-              setExpandedRowKey(expanded ? null : record.key)
+              const nextExpandedRowKey = expanded ? null : record.key
+              setExpandedRowKey(nextExpandedRowKey)
+              setExpandedEvidenceRowKey(null)
             }}
           >
             <span className="audit-detail-trigger-content">
@@ -905,7 +1046,7 @@ const AuditAnalysisPage = () => {
                 <Card variant="borderless" className="audit-metric-card audit-metric-card-declared">
                   <Statistic
                     title="申报总额"
-                    value={totals.declared}
+                    value={animatedDeclaredTotal}
                     formatter={(value) => formatCurrency(Number(value))}
                     prefix={<CircleGauge className="w-4 h-4 text-blue-500" />}
                   />
@@ -913,7 +1054,7 @@ const AuditAnalysisPage = () => {
                 <Card variant="borderless" className="audit-metric-card audit-metric-card-ai">
                   <Statistic
                     title="AI审核金额"
-                    value={totals.ai}
+                    value={animatedAiTotal}
                     formatter={(value) => formatCurrency(Number(value))}
                     prefix={<BrainCircuit className="w-4 h-4 text-violet-500" />}
                   />
@@ -921,7 +1062,7 @@ const AuditAnalysisPage = () => {
                 <Card variant="borderless" className="audit-metric-card audit-metric-card-reduction">
                   <Statistic
                     title="建议核减"
-                    value={totals.reduction}
+                    value={animatedReductionTotal}
                     formatter={(value) => formatCurrency(Number(value))}
                     prefix={<TrendingDown className="w-4 h-4 text-red-500" />}
                     suffix={`(${totals.ratio}%)`}
@@ -945,7 +1086,7 @@ const AuditAnalysisPage = () => {
                         已处理 {prevProcessedRows}/{Math.max(0, Math.trunc(toNumber(submissionDetail?.total_rows)))}
                       </span>
                     </div>
-                    <div className="audit-thinking-list">
+                    <div className="audit-thinking-list" ref={thinkingListRef}>
                       {analysisEvents.length === 0 ? (
                         <p className="audit-thinking-empty">等待分析任务启动...</p>
                       ) : (
@@ -971,18 +1112,60 @@ const AuditAnalysisPage = () => {
                   expandable={{
                     showExpandColumn: false,
                     expandedRowKeys: expandedRowKey ? [expandedRowKey] : [],
-                    expandedRowRender: (record) => (
-                      <Table<AuditDetailRow>
-                        className="audit-detail-table"
-                        rowKey="key"
-                        columns={detailColumns}
-                        dataSource={record.details}
-                        pagination={false}
-                        size="small"
-                        bordered
-                        scroll={{ x: 1200 }}
-                      />
-                    ),
+                    expandedRowRender: (record) => {
+                      const evidenceExpanded = expandedEvidenceRowKey === record.key
+                      const auditEvidence = record.auditEvidence ?? []
+                      return (
+                        <div className="audit-expanded-content">
+                          <Table<AuditDetailRow>
+                            className="audit-detail-table"
+                            rowKey="key"
+                            columns={detailColumns}
+                            dataSource={record.details}
+                            pagination={false}
+                            size="small"
+                            bordered
+                            scroll={{ x: 1200 }}
+                          />
+
+                          <div className="audit-review-block">
+                            <p className="audit-review-title">审核说明</p>
+                            <p className="audit-review-reason">{record.auditReason || "暂无审核说明"}</p>
+                          </div>
+
+                          <div className="audit-review-block">
+                            <div className="audit-review-header">
+                              <p className="audit-review-title">审核依据</p>
+                              <Button
+                                type="link"
+                                className="audit-evidence-toggle"
+                                onClick={() => setExpandedEvidenceRowKey(evidenceExpanded ? null : record.key)}
+                              >
+                                <span className="audit-detail-trigger-content">
+                                  {evidenceExpanded ? "收起" : "展开"}
+                                  {evidenceExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                                </span>
+                              </Button>
+                            </div>
+
+                            {evidenceExpanded &&
+                              (auditEvidence.length > 0 ? (
+                                <Table<AuditEvidenceItem>
+                                  className="audit-evidence-table"
+                                  columns={evidenceColumns}
+                                  dataSource={auditEvidence}
+                                  rowKey={(_row, index) => `${record.key}-${index}`}
+                                  pagination={false}
+                                  size="small"
+                                  tableLayout="fixed"
+                                />
+                              ) : (
+                                <p className="audit-evidence-empty">暂无审核依据</p>
+                              ))}
+                          </div>
+                        </div>
+                      )
+                    },
                   }}
                   pagination={false}
                   size="small"

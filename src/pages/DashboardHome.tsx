@@ -47,6 +47,21 @@ const venueOptionsByCity: Record<string, { label: string; value: number }[]> = {
 }
 const FIXED_CITY = "天津"
 
+const formatFileSize = (bytes: number) => {
+  if (!Number.isFinite(bytes) || bytes <= 0) {
+    return "0 KB"
+  }
+  const sizeInMb = bytes / 1024 / 1024
+  if (sizeInMb >= 1) {
+    return `${sizeInMb.toFixed(1)} MB`
+  }
+  const sizeInKb = bytes / 1024
+  if (sizeInKb >= 1) {
+    return `${sizeInKb.toFixed(1)} KB`
+  }
+  return `${Math.trunc(bytes)} B`
+}
+
 const DashboardHome = () => {
   const user = useAppSelector((s) => s.auth.user)
   const token = useAppSelector((s) => s.auth.token)
@@ -164,7 +179,7 @@ const DashboardHome = () => {
       setUploadedFile({
         raw: file,
         name: file.name,
-        size: `${sizeInMb.toFixed(1)} MB`,
+        size: formatFileSize(file.size),
       })
       message.success("文件已添加")
       return false

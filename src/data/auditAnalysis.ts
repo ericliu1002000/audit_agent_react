@@ -34,6 +34,7 @@ const auditRowsBase: Omit<AuditRow, "details">[] = [
 ]
 
 const buildDetailRows = (row: Omit<AuditRow, "details">): AuditDetailRow[] => {
+  const reviewedAmount = row.ai ?? 0
   const unit = row.item.includes("租赁")
     ? "天"
     : row.item.includes("搭建") || row.item.includes("制作") || row.item.includes("铺设")
@@ -52,11 +53,11 @@ const buildDetailRows = (row: Omit<AuditRow, "details">): AuditDetailRow[] => {
       submittedDays,
       submittedAmount: row.declared,
       reviewedUnit: unit,
-      reviewedUnitPrice: Math.max(1, Math.round(row.ai / divisor)),
+      reviewedUnitPrice: Math.max(1, Math.round(reviewedAmount / divisor)),
       reviewedQuantity: submittedQuantity,
       reviewedDays: submittedDays,
-      reviewedAmount: row.ai,
-      reductionAmount: row.declared - row.ai,
+      reviewedAmount,
+      reductionAmount: row.declared - reviewedAmount,
     },
   ]
 }

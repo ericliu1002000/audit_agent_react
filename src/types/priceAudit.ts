@@ -36,6 +36,6 @@ export type PriceAuditSubmissionDetailResponse = PriceAuditSubmissionResponse
 export type PriceAuditSubmissionRowsResponse = {
   success: boolean
   message?: string
-  data: any
-  meta?: any
+  data: unknown
+  meta?: unknown
 }

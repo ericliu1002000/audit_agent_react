@@ -1,5 +1,12 @@
 export type AmountStatus = "normal" | "warning" | "danger" | "pending"
 
+export type AuditEvidenceItem = {
+  name: string
+  unit: string
+  max: string
+  min: string
+}
+
 export type AuditDetailRow = {
   key: string
   submittedUnit: string
@@ -20,8 +27,11 @@ export type AuditRow = {
   index: number
   item: string
   declared: number
-  ai: number
+  ai: number | null
   status: AmountStatus
+  rowType?: string
+  auditReason?: string
+  auditEvidence?: AuditEvidenceItem[]
   details: AuditDetailRow[]
 }
 
