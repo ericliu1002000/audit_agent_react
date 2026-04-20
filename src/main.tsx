@@ -12,21 +12,26 @@ import DashboardHome from "./pages/DashboardHome"
 import FinancialReportPage from "./pages/FinancialReportPage"
 import AuditAnalysisPage from "./pages/AuditAnalysisPage"
 import TaxPage from "./pages/TaxPage"
-const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <App />,
-    children: [
-      { index: true, element: <DashboardHome /> },
-      { path: "audit-analysis", element: <AuditAnalysisPage /> },
-      { path: "report", element: <FinancialReportPage /> },
-      { path: "tax", element: <TaxPage /> },
-    ],
-  },
-  { path: "/login", element: <Login /> },
-  { path: "/change-password", element: <ChangePassword /> },
-  { path: "*", element: <Navigate to="/" replace /> },
-])
+
+const routerBaseName = import.meta.env.VITE_APP_BASE_PATH?.replace(/\/$/, "") || ""
+const router = createBrowserRouter(
+  [
+    {
+      path: "/",
+      element: <App />,
+      children: [
+        { index: true, element: <DashboardHome /> },
+        { path: "audit-analysis", element: <AuditAnalysisPage /> },
+        { path: "report", element: <FinancialReportPage /> },
+        { path: "tax", element: <TaxPage /> },
+      ],
+    },
+    { path: "/login", element: <Login /> },
+    { path: "/change-password", element: <ChangePassword /> },
+    { path: "*", element: <Navigate to="/" replace /> },
+  ],
+  routerBaseName ? { basename: routerBaseName } : undefined
+)
 
 const renderApp = () => {
   createRoot(document.getElementById("root")!).render(

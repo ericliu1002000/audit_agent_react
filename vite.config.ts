@@ -3,27 +3,13 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "")
-  const apiTarget = env.VITE_API_BASE_URL.replace(/\/api\/?$/, "")
-  const targetOrigin = new URL(apiTarget).origin
+  const appBasePath = env.VITE_APP_BASE_PATH || "/"
+  const base = appBasePath.endsWith("/") ? appBasePath : `${appBasePath}/`
   const isProduction = mode === "production"
 
   return {
+    base,
     plugins: [react()],
-    server: {
-      proxy: {
-        "/api": {
-          target: apiTarget,
-          changeOrigin: true,
-          secure: false,
-          configure(proxy) {
-            proxy.on("proxyReq", (proxyReq) => {
-              proxyReq.setHeader("origin", targetOrigin)
-              proxyReq.setHeader("referer", `${targetOrigin}/`)
-            })
-          },
-        },
-      },
-    },
     build: {
       emptyOutDir: true,
       minify: isProduction ? "terser" : "esbuild",
