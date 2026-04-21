@@ -41,7 +41,7 @@ const Login = () => {
   useEffect(() => {
     let active = true
     const fetchCsrfToken = async () => {
-      if (token && user) return
+      if (user) return
       setCsrfLoading(true)
       try {
         const data = await requestCsrfToken()
@@ -64,7 +64,7 @@ const Login = () => {
     return () => {
       active = false
     }
-  }, [dispatch, token, user])
+  }, [dispatch, user])
 
   if (token && user) {
     return <Navigate to="/" replace />
