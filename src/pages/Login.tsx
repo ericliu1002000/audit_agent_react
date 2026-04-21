@@ -7,7 +7,6 @@ import { useAppDispatch, useAppSelector } from "../store"
 import client from "../api/client"
 import { Button, Checkbox, Input, message } from "antd"
 import type { CsrfResponse, LoginResponse } from "../types/auth"
-import { PASSWORD_RULE_TEXT, isStrongPassword } from "../utils/password"
 import { UserOutlined, EyeInvisibleOutlined, EyeOutlined } from "@ant-design/icons"
 let csrfInitPromise: Promise<CsrfResponse> | null = null
 
@@ -74,17 +73,13 @@ const Login = () => {
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     const usernameValue = username.trim()
-    const passwordValue = password.trim()
+    const passwordValue = password
     if (!usernameValue) {
       message.warning("请输入用户名")
       return
     }
     if (!passwordValue) {
       message.warning("请输入密码")
-      return
-    }
-    if (!isStrongPassword(passwordValue)) {
-      message.warning(PASSWORD_RULE_TEXT)
       return
     }
     if (!token) {
@@ -198,7 +193,6 @@ const Login = () => {
                 style={{ height: 48 }}
                 autoComplete="on"
               />
-              <p className="mt-1 text-xs text-slate-500">{PASSWORD_RULE_TEXT}</p>
             </div>
             <div className="flex items-center justify-between text-sm">
               <Checkbox
