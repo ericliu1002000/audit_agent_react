@@ -1,6 +1,9 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit"
 import type { AuthUser } from "../types/auth"
 
+const CSRF_STORAGE_KEY = "csrf_token"
+const LEGACY_TOKEN_STORAGE_KEY = "auth_token"
+
 type AuthState = {
   token: string | null
   user: AuthUser | null
@@ -9,7 +12,12 @@ type AuthState = {
 
 const getStoredToken = () => {
   try {
-    return localStorage.getItem("auth_token") || sessionStorage.getItem("auth_token")
+    return (
+      localStorage.getItem(CSRF_STORAGE_KEY) ||
+      sessionStorage.getItem(CSRF_STORAGE_KEY) ||
+      localStorage.getItem(LEGACY_TOKEN_STORAGE_KEY) ||
+      sessionStorage.getItem(LEGACY_TOKEN_STORAGE_KEY)
+    )
   } catch {
     return null
   }
@@ -36,8 +44,10 @@ const authSlice = createSlice({
   reducers: {
     setToken: (state, action: PayloadAction<string>) => {
       state.token = action.payload
-      localStorage.setItem("auth_token", action.payload)
-      sessionStorage.removeItem("auth_token")
+      localStorage.setItem(CSRF_STORAGE_KEY, action.payload)
+      localStorage.removeItem(LEGACY_TOKEN_STORAGE_KEY)
+      sessionStorage.removeItem(CSRF_STORAGE_KEY)
+      sessionStorage.removeItem(LEGACY_TOKEN_STORAGE_KEY)
     },
     setAuth: (
       state,
@@ -47,12 +57,16 @@ const authSlice = createSlice({
       state.user = action.payload.user
       state.remember = action.payload.remember
       if (action.payload.remember) {
-        localStorage.setItem("auth_token", action.payload.token)
-        sessionStorage.removeItem("auth_token")
+        localStorage.setItem(CSRF_STORAGE_KEY, action.payload.token)
+        localStorage.removeItem(LEGACY_TOKEN_STORAGE_KEY)
+        sessionStorage.removeItem(CSRF_STORAGE_KEY)
+        sessionStorage.removeItem(LEGACY_TOKEN_STORAGE_KEY)
         localStorage.setItem("auth_user", JSON.stringify(action.payload.user))
       } else {
-        localStorage.removeItem("auth_token")
-        sessionStorage.setItem("auth_token", action.payload.token)
+        localStorage.removeItem(CSRF_STORAGE_KEY)
+        localStorage.removeItem(LEGACY_TOKEN_STORAGE_KEY)
+        sessionStorage.setItem(CSRF_STORAGE_KEY, action.payload.token)
+        sessionStorage.removeItem(LEGACY_TOKEN_STORAGE_KEY)
         localStorage.removeItem("auth_user")
       }
     },
@@ -60,8 +74,10 @@ const authSlice = createSlice({
       state.token = null
       state.user = null
       try {
-        localStorage.removeItem("auth_token")
-        sessionStorage.removeItem("auth_token")
+        localStorage.removeItem(CSRF_STORAGE_KEY)
+        localStorage.removeItem(LEGACY_TOKEN_STORAGE_KEY)
+        sessionStorage.removeItem(CSRF_STORAGE_KEY)
+        sessionStorage.removeItem(LEGACY_TOKEN_STORAGE_KEY)
         localStorage.removeItem("auth_user")
       } catch {
         return
